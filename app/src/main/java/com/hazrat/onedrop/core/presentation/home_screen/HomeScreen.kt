@@ -41,11 +41,6 @@ fun HomeScreen(
                 HomePageHeaderCard(
                     authState = authState
                 )
-
-                UserProfileScreen(
-                    firebaseUser = authState.firebaseUser,
-                    firebaseUserData = authState.firebaseUserData
-                )
             }
             item {
                 Spacer(Modifier.height(dimens.size50))
@@ -62,18 +57,6 @@ fun HomeScreen(
                 }
             }
         }
-    }
-}
-
-
-@Composable
-fun UserProfileScreen(firebaseUserData: FirebaseUserData?, firebaseUser: FirebaseUser?) {
-    val name = firebaseUser?.displayName ?: firebaseUserData?.fullName ?: "Guest"
-    val email = firebaseUser?.email?: firebaseUserData?.email ?: "No Email"
-
-    Column {
-        Text(text = "Name: $name")
-        Text(text = "Email: $email")
     }
 }
 
