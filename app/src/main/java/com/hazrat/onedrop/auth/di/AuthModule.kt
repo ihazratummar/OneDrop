@@ -5,8 +5,6 @@ import androidx.credentials.CredentialManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import com.hazrat.onedrop.auth.data.repository.GoogleClientImpl
-import com.hazrat.onedrop.auth.domain.repository.GoogleClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -39,18 +37,6 @@ object AuthModule {
         return CredentialManager.create(context)
     }
 
-    @Provides
-    fun provideGoogleAuthClient(
-        firebaseAuth: FirebaseAuth,
-        credentialManager: CredentialManager,
-        firestore: FirebaseFirestore
-    ): GoogleClient {
-        return GoogleClientImpl(
-            firebaseAuth = firebaseAuth, credentialManager = credentialManager,
-            firestore = firestore
-        )
-
-    }
 
 
 }

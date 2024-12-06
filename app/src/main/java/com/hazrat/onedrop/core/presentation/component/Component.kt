@@ -35,7 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.hazrat.onedrop.R
-import com.hazrat.onedrop.auth.presentation.AuthState
+import com.hazrat.onedrop.auth.presentation.ProfileState
 import com.hazrat.onedrop.core.navigation.Route
 import com.hazrat.onedrop.ui.theme.dimens
 
@@ -47,7 +47,7 @@ import com.hazrat.onedrop.ui.theme.dimens
 @Composable
 fun HomePageHeaderCard(
     modifier: Modifier = Modifier,
-    authState: AuthState
+    profileState: ProfileState
 ) {
     Box(
         modifier = modifier
@@ -66,7 +66,7 @@ fun HomePageHeaderCard(
             Box(modifier = Modifier.fillMaxSize()) {
                 ProfileAndIcons(
                     modifier = Modifier.align(Alignment.Center),
-                    authState = authState
+                    profileState = profileState
                 )
             }
         }
@@ -103,7 +103,7 @@ fun HomePageHeaderCard(
 @Composable
 fun ProfileAndIcons(
     modifier: Modifier = Modifier,
-    authState: AuthState
+    profileState: ProfileState
 ) {
     Row(
         modifier = modifier
@@ -113,7 +113,7 @@ fun ProfileAndIcons(
     ) {
         Column {
             Text(
-                text = authState.firebaseUser?.displayName ?: authState.firebaseUserData?.fullName?:"",
+                text = profileState.userData?.fullName?:"",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )

@@ -1,7 +1,9 @@
 package com.hazrat.onedrop.auth.presentation.loginscreen
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hazrat.onedrop.auth.domain.repository.AuthRepository
 import com.hazrat.onedrop.auth.domain.usecase.ProfileUseCase
 import com.hazrat.onedrop.auth.presentation.AuthState
 import com.hazrat.onedrop.auth.util.asSuccessUiText
@@ -28,6 +30,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SignInViewMode @Inject constructor(
     private val profileUseCase: ProfileUseCase,
+    authRepository: AuthRepository
 ) : ViewModel() {
 
 
@@ -35,8 +38,10 @@ class SignInViewMode @Inject constructor(
     val signState: StateFlow<SignInState> = _signInState.asStateFlow()
 
 
-    init {
+    val authState: LiveData<AuthState> = authRepository.authState
 
+    init {
+        authRepository.checkAuthStatus()
     }
 
 
@@ -135,7 +140,6 @@ class SignInViewMode @Inject constructor(
                     )
                     when (result) {
                         is Result.Error -> {
-                            AuthState(isAuthenticated = false, isLoading = false)
                             _signInState.update { it.copy(isLoading = false) }
 
                             val errorMessage = result.error.asUiText()
@@ -146,7 +150,6 @@ class SignInViewMode @Inject constructor(
                             val successMessage = result.data.asSuccessUiText()
                             eventChannel.send(UserEvent.Success(successMessage))
                             delay(2000L)
-                            AuthState(isAuthenticated = false, isLoading = false)
                             _signInState.update { it.copy(isLoading = false) }
 
                         }

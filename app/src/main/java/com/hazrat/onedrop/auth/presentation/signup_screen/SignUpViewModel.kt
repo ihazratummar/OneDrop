@@ -2,6 +2,7 @@ package com.hazrat.onedrop.auth.presentation.signup_screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hazrat.onedrop.auth.domain.repository.AuthRepository
 import com.hazrat.onedrop.auth.domain.usecase.ProfileUseCase
 import com.hazrat.onedrop.auth.presentation.AuthState
 import com.hazrat.onedrop.util.results.PasswordValidationError
@@ -22,9 +23,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
-    private val profileUseCase: ProfileUseCase
+    private val profileUseCase: ProfileUseCase,
+    authRepository: AuthRepository
 ) : ViewModel() {
 
+
+    init {
+        authRepository.checkAuthStatus()
+    }
 
     private val _signUpState = MutableStateFlow(
         SignUpState(
@@ -139,13 +145,11 @@ class SignUpViewModel @Inject constructor(
 
                     when (result) {
                         is Result.Error -> {
-                            AuthState(isAuthenticated = false, isLoading = false)
                             _signUpState.update { it.copy(isLoading = false) }
                         }
 
                         is Result.Success -> {
                             delay(2000L)
-                            AuthState(isAuthenticated = true, isLoading = false)
                             _signUpState.update { it.copy(isLoading = false) }
                         }
                     }
