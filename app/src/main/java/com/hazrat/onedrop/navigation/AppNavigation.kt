@@ -44,7 +44,6 @@ fun AppNavigation(
     ) {
         if (authState.isAuthenticated) {
             contentNavigation(
-                navController = navHostController,
                 snackbarHostState = snackbarHostState,
                 authState = authState
             )

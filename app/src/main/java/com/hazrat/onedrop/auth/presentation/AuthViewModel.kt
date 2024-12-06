@@ -1,9 +1,7 @@
 package com.hazrat.onedrop.auth.presentation
 
 import android.content.Context
-import android.net.Uri
 import android.util.Log
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -14,8 +12,6 @@ import com.hazrat.onedrop.auth.data.repository.GoogleClientImpl
 import com.hazrat.onedrop.auth.domain.model.FirebaseUserData
 import com.hazrat.onedrop.auth.domain.repository.AuthRepository
 import com.hazrat.onedrop.auth.domain.repository.GoogleClient
-import com.hazrat.onedrop.navigation.MasterRoot
-import com.hazrat.onedrop.util.datastore.DataStorePreference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

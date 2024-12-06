@@ -1,6 +1,5 @@
 package com.hazrat.onedrop.auth.presentation.loginscreen
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -30,13 +28,13 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import com.hazrat.onedrop.main.MainActivity
 import com.hazrat.onedrop.R
 import com.hazrat.onedrop.auth.presentation.AuthEvent
 import com.hazrat.onedrop.auth.presentation.common.AuthenticationButton
 import com.hazrat.onedrop.auth.presentation.common.BottomText
 import com.hazrat.onedrop.auth.presentation.common.MobileNumberTextField
 import com.hazrat.onedrop.auth.presentation.common.SocialLoginButton
+import com.hazrat.onedrop.main.MainActivity
 import com.hazrat.onedrop.ui.theme.Nunito
 import com.hazrat.onedrop.ui.theme.dimens
 import kotlinx.coroutines.launch
