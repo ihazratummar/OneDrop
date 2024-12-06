@@ -1,7 +1,6 @@
 package com.hazrat.onedrop.core.presentation.home_screen
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -10,10 +9,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.google.firebase.auth.FirebaseUser
-import com.hazrat.onedrop.auth.domain.model.FirebaseUserData
 import com.hazrat.onedrop.auth.presentation.AuthEvent
-import com.hazrat.onedrop.auth.presentation.AuthState
+import com.hazrat.onedrop.auth.presentation.ProfileState
 import com.hazrat.onedrop.core.presentation.component.ActivityAs
 import com.hazrat.onedrop.core.presentation.component.HomeActivityGrid
 import com.hazrat.onedrop.core.presentation.component.HomePageHeaderCard
@@ -29,7 +26,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     onActivityClick: (ActivityAs) -> Unit,
     authEvent: (AuthEvent) -> Unit,
-    authState: AuthState
+    profileState: ProfileState
 ) {
     Box(
         modifier = modifier.fillMaxSize()
@@ -39,8 +36,9 @@ fun HomeScreen(
         ) {
             item {
                 HomePageHeaderCard(
-                    authState = authState
+                    profileState = profileState
                 )
+
             }
             item {
                 Spacer(Modifier.height(dimens.size50))
