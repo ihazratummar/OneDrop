@@ -3,9 +3,7 @@ package com.hazrat.onedrop.auth.di
 import android.content.Context
 import androidx.credentials.CredentialManager
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.hazrat.onedrop.auth.data.repository.GoogleClientImpl
 import com.hazrat.onedrop.auth.domain.repository.GoogleClient
@@ -14,7 +12,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import jakarta.inject.Singleton
 
 
 @Module

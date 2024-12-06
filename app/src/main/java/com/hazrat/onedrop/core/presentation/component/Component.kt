@@ -110,27 +110,12 @@ fun ProfileAndIcons(
     modifier: Modifier = Modifier,
     authState: AuthState
 ) {
-    val context = LocalContext.current
-    val painter = rememberAsyncImagePainter(
-        model = ImageRequest.Builder(context)
-            .data(authState.firebaseUser?.photoUrl)
-            .crossfade(true)
-            .build()
-    )
-
-
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = dimens.size20),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            painter = painter,
-            contentDescription = null,
-            modifier = Modifier.size(dimens.size60),
-        )
-        Spacer(Modifier.width(dimens.size10))
         Column {
             Text(
                 text = authState.firebaseUser?.displayName ?: authState.firebaseUserData?.fullName?:"",

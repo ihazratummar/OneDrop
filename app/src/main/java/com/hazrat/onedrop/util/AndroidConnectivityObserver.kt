@@ -7,6 +7,7 @@ import android.net.NetworkCapabilities
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.content.getSystemService
+import com.hazrat.onedrop.util.datastore.DataStorePreference
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -20,6 +21,7 @@ import javax.inject.Inject
 
 class AndroidConnectivityObserver @Inject constructor(
     @ApplicationContext context: Context,
+    private val dataStorePreference: DataStorePreference
 ) : ConnectivityObserver {
 
     val connectivityManager = context.getSystemService<ConnectivityManager>()!!
@@ -31,17 +33,20 @@ class AndroidConnectivityObserver @Inject constructor(
                 override fun onAvailable(network: Network) {
                     super.onAvailable(network)
                     trySend(true)
+                    dataStorePreference.setNetworkBoolean(true)
                 }
 
 
                 override fun onLost(network: Network) {
                     super.onLost(network)
                     trySend(false)
+                    dataStorePreference.setNetworkBoolean(false)
                 }
 
                 override fun onUnavailable() {
                     super.onUnavailable()
                     trySend(false)
+                    dataStorePreference.setNetworkBoolean(false)
                 }
 
                 override fun onCapabilitiesChanged(
@@ -53,6 +58,7 @@ class AndroidConnectivityObserver @Inject constructor(
                         NetworkCapabilities.NET_CAPABILITY_VALIDATED
                     )
                     trySend(connected)
+                    dataStorePreference.setNetworkBoolean(connected)
                 }
             }
 

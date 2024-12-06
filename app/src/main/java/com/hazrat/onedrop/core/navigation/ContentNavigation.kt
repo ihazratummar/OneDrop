@@ -9,7 +9,7 @@ import androidx.navigation.navigation
 import com.hazrat.onedrop.auth.presentation.AuthState
 import com.hazrat.onedrop.auth.presentation.AuthViewModel
 import com.hazrat.onedrop.core.presentation.home_screen.HomeScreen
-import com.hazrat.onedrop.navigation.RootNav
+import com.hazrat.onedrop.navigation.MasterRoot.RootNav
 
 /**
  * @author Hazrat Ummar Shaikh

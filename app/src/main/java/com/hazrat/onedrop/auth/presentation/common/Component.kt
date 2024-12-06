@@ -171,14 +171,13 @@ fun AuthenticationButton(
     isButtonEnabled: Boolean,
     isLoadings: Boolean
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
+
 
     Button(
         modifier = modifier.fillMaxWidth().let {
             if (isLoadings) it.buttonShimmerEffect() else it
         },
         onClick = {
-            keyboardController?.hide()
             onButtonClick()
         },
         shape = RoundedCornerShape(dimens.size10),

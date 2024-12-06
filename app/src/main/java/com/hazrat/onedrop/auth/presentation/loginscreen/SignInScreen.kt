@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -92,6 +93,7 @@ fun SignInScreen(
             .fillMaxSize()
             .padding(horizontal = dimens.size20)
     ) {
+        val keyboardController = LocalSoftwareKeyboardController.current
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
@@ -132,7 +134,12 @@ fun SignInScreen(
                     isError = signInState.password.isNotEmpty() && !signInState.isPasswordValid,
                     visualTransformation = if (signInState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     errorMessage = signInState.errorPassword,
-                    keyBoardActions = KeyboardActions.Default,
+                    keyBoardActions = KeyboardActions(
+                        onDone = {
+                            keyboardController?.hide()
+                            signInEvent(SignInEvent.SignIn)
+                        }
+                    ),
                     isPasswordVisible = !signInState.isPasswordVisible,
                     onTrailingIconCliCk = {
                         signInEvent(SignInEvent.TogglePasswordVisibility)
@@ -145,8 +152,8 @@ fun SignInScreen(
                 AuthenticationButton(
                     buttonText = "Login",
                     onButtonClick = {
+                        keyboardController?.hide()
                         signInEvent(SignInEvent.SignIn)
-                        Log.d("SignInScreen", "Check Button Click ${signInState.isLoading}")
                     },
                     isButtonEnabled = signInState.isFormValid,
                     isLoadings = signInState.isLoading

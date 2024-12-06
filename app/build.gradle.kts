@@ -123,4 +123,8 @@ dependencies {
     implementation(libs.firebase.auth)
 
     implementation(libs.coil.compose)
+
+//Splash Api
+    implementation (libs.androidx.core.splashscreen)
+
 }
