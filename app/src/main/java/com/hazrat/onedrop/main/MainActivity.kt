@@ -15,12 +15,14 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
+import com.hazrat.onedrop.auth.presentation.AuthState
 import com.hazrat.onedrop.auth.presentation.AuthViewModel
 import com.hazrat.onedrop.auth.presentation.common.NetworkStatusBar
 import com.hazrat.onedrop.navigation.AppNavigation
@@ -75,9 +77,11 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val bottomPadding = it.calculateBottomPadding()
                     val authViewModel: AuthViewModel = hiltViewModel()
-                    val authState = authViewModel.authState.collectAsState()
+                    val authState =
+                        authViewModel.authState.observeAsState(initial = AuthState.Loading)
+                    val profileState = authViewModel.profileState.collectAsState()
 
-                    if (authState.value.isLoading) {
+                    if (authState.value == AuthState.Loading) {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
@@ -89,8 +93,9 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier
                                 .padding(bottom = bottomPadding),
                             navHostController = navController,
-                            authState = authState.value,
-                            snackbarHostState = snackBarHostState
+                            profileState = profileState.value,
+                            snackbarHostState = snackBarHostState,
+                            authState = authState.value
                         )
                     }
                 }

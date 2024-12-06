@@ -24,6 +24,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.hazrat.onedrop.auth.navigation.authNavigation
 import com.hazrat.onedrop.auth.presentation.AuthState
+import com.hazrat.onedrop.auth.presentation.ProfileState
 import com.hazrat.onedrop.core.navigation.BottomNavigation
 import com.hazrat.onedrop.core.navigation.contentNavigation
 import kotlinx.serialization.Serializable
@@ -32,8 +33,9 @@ import kotlinx.serialization.Serializable
 fun AppNavigation(
     modifier: Modifier = Modifier,
     navHostController: NavHostController,
-    authState: AuthState,
-    snackbarHostState: SnackbarHostState
+    profileState: ProfileState,
+    snackbarHostState: SnackbarHostState,
+    authState: AuthState
 ) {
 
 
@@ -42,10 +44,10 @@ fun AppNavigation(
         navController = navHostController,
         startDestination = MasterRoot.RootNav
     ) {
-        if (authState.isAuthenticated) {
+        if (authState == AuthState.Authenticated) {
             contentNavigation(
                 snackbarHostState = snackbarHostState,
-                authState = authState
+                profileState = profileState
             )
         } else {
             authNavigation(

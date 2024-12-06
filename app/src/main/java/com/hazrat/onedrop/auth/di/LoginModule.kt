@@ -20,16 +20,14 @@ object LoginModule {
 
     @Provides
     fun provideSignUpRepository(
-        @ApplicationContext context: Context,
         firebaseAuth: FirebaseAuth,
         firestore: FirebaseFirestore,
-        firebaseStorage: FirebaseStorage,
+        credentialManager: androidx.credentials.CredentialManager
     ): AuthRepository {
         return AuthRepositoryImpl(
-            context = context,
             firebaseAuth = firebaseAuth,
             firestore = firestore,
-            storage = firebaseStorage
+            credentialManager = credentialManager
         )
     }
 
