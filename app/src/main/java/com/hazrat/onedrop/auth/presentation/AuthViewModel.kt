@@ -1,7 +1,6 @@
 package com.hazrat.onedrop.auth.presentation
 
 import android.content.Context
-import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -32,11 +31,14 @@ class AuthViewModel @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
     auth: FirebaseAuth,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow(AuthState())
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
+
+
+
 
     init {
         firebaseAuth.addAuthStateListener { auth ->
@@ -46,6 +48,7 @@ class AuthViewModel @Inject constructor(
                 _authState.update { it.copy(isAuthenticated = false) }
             }
         }
+
     }
 
 

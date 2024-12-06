@@ -1,6 +1,5 @@
 package com.hazrat.onedrop.auth.presentation.loginscreen
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -23,19 +21,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import com.hazrat.onedrop.main.MainActivity
 import com.hazrat.onedrop.R
 import com.hazrat.onedrop.auth.presentation.AuthEvent
 import com.hazrat.onedrop.auth.presentation.common.AuthenticationButton
 import com.hazrat.onedrop.auth.presentation.common.BottomText
 import com.hazrat.onedrop.auth.presentation.common.MobileNumberTextField
 import com.hazrat.onedrop.auth.presentation.common.SocialLoginButton
+import com.hazrat.onedrop.main.MainActivity
 import com.hazrat.onedrop.ui.theme.Nunito
 import com.hazrat.onedrop.ui.theme.dimens
 import kotlinx.coroutines.launch
@@ -92,6 +91,7 @@ fun SignInScreen(
             .fillMaxSize()
             .padding(horizontal = dimens.size20)
     ) {
+        val keyboardController = LocalSoftwareKeyboardController.current
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
@@ -132,7 +132,12 @@ fun SignInScreen(
                     isError = signInState.password.isNotEmpty() && !signInState.isPasswordValid,
                     visualTransformation = if (signInState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     errorMessage = signInState.errorPassword,
-                    keyBoardActions = KeyboardActions.Default,
+                    keyBoardActions = KeyboardActions(
+                        onDone = {
+                            keyboardController?.hide()
+                            signInEvent(SignInEvent.SignIn)
+                        }
+                    ),
                     isPasswordVisible = !signInState.isPasswordVisible,
                     onTrailingIconCliCk = {
                         signInEvent(SignInEvent.TogglePasswordVisibility)
@@ -145,8 +150,8 @@ fun SignInScreen(
                 AuthenticationButton(
                     buttonText = "Login",
                     onButtonClick = {
+                        keyboardController?.hide()
                         signInEvent(SignInEvent.SignIn)
-                        Log.d("SignInScreen", "Check Button Click ${signInState.isLoading}")
                     },
                     isButtonEnabled = signInState.isFormValid,
                     isLoadings = signInState.isLoading

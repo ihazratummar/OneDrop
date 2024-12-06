@@ -9,6 +9,5 @@ package com.hazrat.onedrop.auth.domain.model
 data class FirebaseUserData(
     val userId: String?="",
     val fullName: String?="",
-    val email: String? ="",
-    val profilePictureUrl: String?=""
+    val email: String? =""
 )

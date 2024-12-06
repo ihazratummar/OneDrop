@@ -1,6 +1,5 @@
 package com.hazrat.onedrop.navigation
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -13,7 +12,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -24,7 +22,6 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.hazrat.onedrop.auth.navigation.AuthRoute
 import com.hazrat.onedrop.auth.navigation.authNavigation
 import com.hazrat.onedrop.auth.presentation.AuthState
 import com.hazrat.onedrop.core.navigation.BottomNavigation
@@ -36,17 +33,17 @@ fun AppNavigation(
     modifier: Modifier = Modifier,
     navHostController: NavHostController,
     authState: AuthState,
-    snackbarHostState: SnackbarHostState,
+    snackbarHostState: SnackbarHostState
 ) {
+
 
     NavHost(
         modifier = modifier,
         navController = navHostController,
-        startDestination = RootNav
+        startDestination = MasterRoot.RootNav
     ) {
         if (authState.isAuthenticated) {
             contentNavigation(
-                navController = navHostController,
                 snackbarHostState = snackbarHostState,
                 authState = authState
             )
@@ -122,4 +119,9 @@ fun BottomNavigationBar(
 }
 
 @Serializable
-data object RootNav
+sealed class MasterRoot(){
+    @Serializable
+    data object RootNav : MasterRoot()
+
+}
+

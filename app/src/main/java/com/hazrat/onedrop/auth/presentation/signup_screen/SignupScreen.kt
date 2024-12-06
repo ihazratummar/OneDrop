@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -47,7 +48,7 @@ fun SignUpScreen(
     signUpState: SignUpState,
     signUpEvent: (SignUpEvent) -> Unit
 ) {
-
+    val keyboardController = LocalSoftwareKeyboardController.current
     val context = LocalContext.current
     val activity = context as MainActivity
     Box(
@@ -110,9 +111,14 @@ fun SignUpScreen(
                     label = "Type Password",
                     placeholder = "Enter Your Password!",
                     isError = signUpState.password.isNotEmpty() && !signUpState.isPasswordValid,
-                    visualTransformation =  if (signUpState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    visualTransformation = if (signUpState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     errorMessage = signUpState.errorPassword,
-                    keyBoardActions = KeyboardActions.Default,
+                    keyBoardActions = KeyboardActions(
+                        onDone = {
+                            keyboardController?.hide()
+                            signUpEvent(SignUpEvent.SignUp)
+                        }
+                    ),
                     isTrailingForPassword = true,
                     onTrailingIconCliCk = {
                         signUpEvent(SignUpEvent.TogglePasswordVisibility)
@@ -124,7 +130,10 @@ fun SignUpScreen(
                 AuthenticationButton(
                     modifier = Modifier.fillMaxWidth(),
                     buttonText = "Sign Up",
-                    onButtonClick = { signUpEvent(SignUpEvent.SignUp) },
+                    onButtonClick = {
+                        keyboardController?.hide()
+                        signUpEvent(SignUpEvent.SignUp)
+                    },
                     isButtonEnabled = signUpState.isFormValid,
                     isLoadings = signUpState.isLoading
                 )

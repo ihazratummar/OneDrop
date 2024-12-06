@@ -2,7 +2,6 @@ package com.hazrat.onedrop.core.presentation.component
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -29,16 +28,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import coil3.compose.rememberAsyncImagePainter
-import coil3.request.ImageRequest
-import coil3.request.crossfade
 import com.hazrat.onedrop.R
 import com.hazrat.onedrop.auth.presentation.AuthState
 import com.hazrat.onedrop.core.navigation.Route
@@ -110,27 +105,12 @@ fun ProfileAndIcons(
     modifier: Modifier = Modifier,
     authState: AuthState
 ) {
-    val context = LocalContext.current
-    val painter = rememberAsyncImagePainter(
-        model = ImageRequest.Builder(context)
-            .data(authState.firebaseUser?.photoUrl)
-            .crossfade(true)
-            .build()
-    )
-
-
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = dimens.size20),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            painter = painter,
-            contentDescription = null,
-            modifier = Modifier.size(dimens.size60),
-        )
-        Spacer(Modifier.width(dimens.size10))
         Column {
             Text(
                 text = authState.firebaseUser?.displayName ?: authState.firebaseUserData?.fullName?:"",

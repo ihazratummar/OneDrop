@@ -15,14 +15,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.hazrat.onedrop.BuildConfig
 import com.hazrat.onedrop.auth.domain.model.FirebaseUserData
 import com.hazrat.onedrop.auth.domain.repository.GoogleClient
-import com.hazrat.onedrop.auth.util.Constant.FIRESTORE_COLLECTION
 import com.hazrat.onedrop.auth.util.saveUserToFirestore
-import jakarta.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
-import kotlin.coroutines.resumeWithException
+import javax.inject.Inject
 
 /**
  * @author Hazrat Ummar Shaikh
@@ -77,8 +74,7 @@ class GoogleClientImpl @Inject constructor(
                 val userData = FirebaseUserData(
                     userId = authResult.user?.uid ?: "",
                     fullName = authResult.user?.displayName ?: "",
-                    email = authResult.user?.email ?: "",
-                    profilePictureUrl = authResult?.user?.photoUrl.toString()
+                    email = authResult.user?.email ?: ""
                 )
                 val userId = authResult?.user?.uid ?: ""
                 saveUserToFirestore(userId, userData, firestore)

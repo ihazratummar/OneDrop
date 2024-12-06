@@ -12,7 +12,7 @@ import com.hazrat.onedrop.auth.presentation.loginscreen.SignInScreen
 import com.hazrat.onedrop.auth.presentation.loginscreen.SignInViewMode
 import com.hazrat.onedrop.auth.presentation.signup_screen.SignUpScreen
 import com.hazrat.onedrop.auth.presentation.signup_screen.SignUpViewModel
-import com.hazrat.onedrop.navigation.RootNav
+import com.hazrat.onedrop.navigation.MasterRoot.RootNav
 
 /**
  * @author Hazrat Ummar Shaikh

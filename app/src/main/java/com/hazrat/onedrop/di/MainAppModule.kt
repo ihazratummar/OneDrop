@@ -3,6 +3,7 @@ package com.hazrat.onedrop.di
 import android.content.Context
 import com.hazrat.onedrop.util.AndroidConnectivityObserver
 import com.hazrat.onedrop.util.ConnectivityObserver
+import com.hazrat.onedrop.util.datastore.DataStorePreference
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,9 +19,15 @@ import javax.inject.Qualifier
 object MainAppModule {
 
     @Provides
-    fun provideAndroidConnectivityObserver(@ApplicationContext context: Context): ConnectivityObserver {
+    fun provideAndroidConnectivityObserver(
+        @ApplicationContext context: Context,
+        dataStorePreference: DataStorePreference
+    ): ConnectivityObserver {
 
-        return AndroidConnectivityObserver(context = context)
+        return AndroidConnectivityObserver(
+            context = context,
+            dataStorePreference = dataStorePreference
+        )
 
     }
 
@@ -28,6 +35,11 @@ object MainAppModule {
     @Provides
     fun provideApplicationScope(): CoroutineScope {
         return CoroutineScope(Dispatchers.IO)
+    }
+
+    @Provides
+    fun provideDataStorePreference(@ApplicationContext context: Context): DataStorePreference {
+        return DataStorePreference(context)
     }
 
 }
