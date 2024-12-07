@@ -79,7 +79,8 @@ fun CustomTextField(
     errorMessage: String?,
     onTrailingIconCliCk: () -> Unit = {},
     isPasswordVisible: Boolean = false,
-    isTrailingForPassword: Boolean = false
+    isTrailingForPassword: Boolean = false,
+    isEnabled: Boolean = true
 ) {
     Column {
         Row(
@@ -111,6 +112,7 @@ fun CustomTextField(
 
         }
         OutlinedTextField(
+            enabled = isEnabled,
             modifier = modifier
                 .fillMaxWidth(),
             value = value,

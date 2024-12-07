@@ -1,10 +1,10 @@
 package com.hazrat.onedrop.core.domain.repository
 
 import com.hazrat.onedrop.core.domain.model.BloodDonorModel
-import com.hazrat.onedrop.core.domain.model.BloodGroup
-import com.hazrat.onedrop.core.domain.model.State
+import com.hazrat.onedrop.util.results.BloodDonorProfileError
+import com.hazrat.onedrop.util.results.BloodDonorProfileSuccess
+import com.hazrat.onedrop.util.results.Result
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 
 /**
  * @author Hazrat Ummar Shaikh
@@ -13,21 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface BloodDonorRepository {
 
-    val bloodDonorProfile: StateFlow<BloodDonorModel?>
-
-    suspend fun createBloodDonorProfile()
-
-    fun setName(name: String)
-
-    fun setBloodGroup(bloodGroup: BloodGroup)
-
-    fun setDistrict(district: String)
-
-    fun setState(state: State)
-
-    fun setAvailable()
-
-    fun setContactNumber(number: String)
+    suspend fun createBloodDonorProfile(bloodDonorModel: BloodDonorModel) : Result<BloodDonorProfileSuccess , BloodDonorProfileError>
 
     suspend fun getListOfDonors(): Flow<List<BloodDonorModel>>
 

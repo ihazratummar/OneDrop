@@ -62,7 +62,7 @@ fun NavGraphBuilder.contentNavigation(
 
         composable<Route.BloodDonorRoute> {
             val donorList by bloodDonorViewModel.donorList.collectAsState()
-            val bloodDonorProfileState by bloodDonorViewModel.isBloodDonorProfileExists.collectAsState()
+            val bloodDonorProfileState by bloodDonorViewModel.bloodDonorProfileState.collectAsState()
             BloodDonorScreen(
                 bloodDonorEvent = bloodDonorViewModel::onEvent,
                 donorList = donorList,
@@ -73,11 +73,12 @@ fun NavGraphBuilder.contentNavigation(
         }
         composable<CreateBloodDonorProfileRoute>{
             val bloodDonorModel by bloodDonorViewModel.bloodDonorProfile.collectAsState()
+            val bloodDonorProfileState by bloodDonorViewModel.bloodDonorProfileState.collectAsState()
             CreateBloodDonorScreen(
                 onBackClick = { navController.popBackStack() },
-                onRegisterClick = { navController.popBackStack() },
                 bloodDonorEvent = bloodDonorViewModel::onEvent,
-                bloodDonorModel = bloodDonorModel
+                bloodDonorModel = bloodDonorModel,
+                bloodDonorProfileState = bloodDonorProfileState
             )
 
         }

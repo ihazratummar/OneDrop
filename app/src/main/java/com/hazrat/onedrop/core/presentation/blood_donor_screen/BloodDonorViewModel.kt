@@ -1,8 +1,8 @@
 package com.hazrat.onedrop.core.presentation.blood_donor_screen
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.hazrat.onedrop.core.domain.model.BloodDonorModel
 import com.hazrat.onedrop.core.domain.repository.BloodDonorRepository
 import com.hazrat.onedrop.util.datastore.DataStorePreference
@@ -22,21 +22,27 @@ import javax.inject.Inject
 @HiltViewModel
 class BloodDonorViewModel @Inject constructor(
     private val repository: BloodDonorRepository,
-    private val dataStorePreference: DataStorePreference
+    private val dataStorePreference: DataStorePreference,
+    firebaseAuth: FirebaseAuth
 ) : ViewModel() {
 
     private val _donorList = MutableStateFlow<List<BloodDonorModel>>(emptyList())
-    val donorList: StateFlow<List<BloodDonorModel>>  = _donorList.asStateFlow()
+    val donorList: StateFlow<List<BloodDonorModel>> = _donorList.asStateFlow()
 
-    val bloodDonorProfile: StateFlow<BloodDonorModel?> = repository.bloodDonorProfile
+    private val _bloodDonorProfile = MutableStateFlow(BloodDonorModel())
+    val bloodDonorProfile: StateFlow<BloodDonorModel> = _bloodDonorProfile.asStateFlow()
 
-    private val _bloodDonorProfileExists = MutableStateFlow(
+    private val _bloodDonorProfileState = MutableStateFlow(
         BloodDonorProfileState(
             isBloodDonorProfileExists = dataStorePreference.getBloodDonorRegistered()
         )
 
     )
-    val isBloodDonorProfileExists: StateFlow<BloodDonorProfileState>  = _bloodDonorProfileExists.asStateFlow()
+
+    val userId = firebaseAuth.currentUser?.uid
+
+    val bloodDonorProfileState: StateFlow<BloodDonorProfileState> =
+        _bloodDonorProfileState.asStateFlow()
 
     init {
         getListOfDonors()
@@ -45,16 +51,16 @@ class BloodDonorViewModel @Inject constructor(
     fun refreshProfileState() {
         viewModelScope.launch {
             repository.isBloodDonorProfileExists().collect { state ->
-                _bloodDonorProfileExists.update {
+                _bloodDonorProfileState.update {
                     it.copy(isBloodDonorProfileExists = state)
                 }
             }
         }
     }
 
-    fun getListOfDonors(){
+    fun getListOfDonors() {
         viewModelScope.launch {
-            repository.getListOfDonors().collect{
+            repository.getListOfDonors().collect {
                 _donorList.value = it
             }
         }
@@ -63,45 +69,106 @@ class BloodDonorViewModel @Inject constructor(
     fun onEvent(event: BloodDonorEvent) {
         when (event) {
             is BloodDonorEvent.SetName -> {
-                repository.setName(event.name)
+                _bloodDonorProfile.update {
+                    it.copy(
+                        name = event.name
+                    )
+                }
             }
 
             is BloodDonorEvent.SetBloodGroup -> {
-                repository.setBloodGroup(event.bloodGroup)
+                _bloodDonorProfile.update {
+                    it.copy(
+                        bloodGroup = event.bloodGroup
+                    )
+                }
             }
 
             is BloodDonorEvent.SetAvailable -> {
-                repository.setAvailable()
+                _bloodDonorProfile.update {
+                    it.copy(
+                        available = event.available
+                    )
+                }
             }
 
             is BloodDonorEvent.SetContactNumber -> {
-                repository.setContactNumber(event.contactNumber)
+                _bloodDonorProfile.update {
+                    it.copy(
+                        contactNumber = event.contactNumber
+                    )
+                }
             }
 
-            BloodDonorEvent.SetContactNumberPrivate -> TODO()
+            BloodDonorEvent.SetContactNumberPrivate -> {
+                _bloodDonorProfile.update {
+                    it.copy(
+                        isContactNumberPrivate = !_bloodDonorProfile.value.isContactNumberPrivate
+                    )
+                }
+            }
 
             BloodDonorEvent.SetNotificationEnabled -> {
-
+                _bloodDonorProfile.update {
+                    it.copy(
+                        notificationEnabled = !_bloodDonorProfile.value.notificationEnabled
+                    )
+                }
             }
 
             BloodDonorEvent.SetNotificationScope -> TODO()
 
             is BloodDonorEvent.SetDistrict -> {
-                repository.setDistrict(event.district)
+                _bloodDonorProfile.update {
+                    it.copy(
+                        district = event.district
+                    )
+                }
             }
 
             is BloodDonorEvent.SetState -> {
-                repository.setState(event.state)
+                _bloodDonorProfile.update {
+                    it.copy(
+                        state = event.state
+                    )
+                }
             }
 
             BloodDonorEvent.CreateBloodDonorProfile -> {
                 viewModelScope.launch {
-                    repository.createBloodDonorProfile()
+                    repository.createBloodDonorProfile(
+                        bloodDonorModel = BloodDonorModel(
+                            userId = this@BloodDonorViewModel.userId.toString(),
+                            name = _bloodDonorProfile.value.name,
+                            bloodGroup = _bloodDonorProfile.value.bloodGroup,
+                            available = _bloodDonorProfile.value.available,
+                            contactNumber = _bloodDonorProfile.value.contactNumber,
+                            district = _bloodDonorProfile.value.district,
+                            isContactNumberPrivate = _bloodDonorProfile.value.isContactNumberPrivate,
+                            notificationEnabled = _bloodDonorProfile.value.notificationEnabled,
+                            notificationScope = _bloodDonorProfile.value.notificationScope,
+                        )
+                    )
                     refreshProfileState()
                     getListOfDonors()
                 }
             }
 
+            BloodDonorEvent.OnBloodDropDownClick -> {
+                _bloodDonorProfileState.update {
+                    it.copy(
+                        isBloodDropDownOpen = !it.isBloodDropDownOpen
+                    )
+                }
+            }
+
+            BloodDonorEvent.OnStateDropDownClick -> {
+                _bloodDonorProfileState.update {
+                    it.copy(
+                        isStateDropDownOpen = !it.isStateDropDownOpen
+                    )
+                }
+            }
         }
     }
 

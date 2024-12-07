@@ -22,4 +22,8 @@ sealed interface BloodDonorEvent {
 
     data object CreateBloodDonorProfile : BloodDonorEvent
 
+    data object OnBloodDropDownClick : BloodDonorEvent
+
+    data object OnStateDropDownClick : BloodDonorEvent
+
 }

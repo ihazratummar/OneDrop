@@ -34,13 +34,11 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import com.hazrat.onedrop.R
 import com.hazrat.onedrop.auth.presentation.ProfileState
 import com.hazrat.onedrop.core.domain.model.BloodDonorModel
 import com.hazrat.onedrop.core.domain.model.BloodGroup
 import com.hazrat.onedrop.core.navigation.Route
-import com.hazrat.onedrop.core.presentation.blood_donor_screen.BloodDonorProfileState
 import com.hazrat.onedrop.ui.theme.dimens
 
 /**
@@ -417,14 +415,13 @@ fun BloodDonorsCards(
 }
 
 
+
 @OptIn(ExperimentalFoundationApi::class)
-@Preview
 @Composable
 fun RegisterAsDonorCard(
     modifier: Modifier = Modifier,
-    bloodDonorProfileState: BloodDonorProfileState = BloodDonorProfileState(false, false),
-    onRegisterCardClick: () -> Unit = {},
-    goToProfile: () -> Unit = {}
+    onClick:() -> Unit,
+    text: String = "Register as a blood donor?"
 ) {
     Card(
         modifier = modifier
@@ -433,7 +430,7 @@ fun RegisterAsDonorCard(
             .combinedClickable(
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() },
-                onClick = { if (!bloodDonorProfileState.isBloodDonorProfileExists) onRegisterCardClick() else goToProfile() }
+                onClick = { onClick() }
             ),
         colors = CardDefaults.cardColors(
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -449,7 +446,7 @@ fun RegisterAsDonorCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = if (!bloodDonorProfileState.isBloodDonorProfileExists) "Register as a blood donor?" else "Go to your donor Profile",
+                text = text,
                 style = MaterialTheme.typography.titleMedium
             )
             Spacer(Modifier.width(dimens.size35))

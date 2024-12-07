@@ -9,25 +9,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.hazrat.onedrop.core.domain.model.BloodDonorModel
 import com.hazrat.onedrop.core.presentation.component.BasicAppBar
 import com.hazrat.onedrop.core.presentation.component.BloodDonorsCards
 import com.hazrat.onedrop.core.presentation.component.RegisterAsDonorCard
 import com.hazrat.onedrop.ui.theme.dimens
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.window.Dialog
 
 /**
  * @author Hazrat Ummar Shaikh
@@ -42,7 +32,8 @@ fun BloodDonorScreen(
     donorList: List<BloodDonorModel>,
     bloodDonorProfileState: BloodDonorProfileState,
     onBackClick: () -> Unit,
-    onRegisterClick: () -> Unit
+    onRegisterClick: () -> Unit,
+    onGoToProfileClick: () -> Unit = {}
 ) {
     Box(
         modifier = modifier.fillMaxSize()
@@ -68,10 +59,10 @@ fun BloodDonorScreen(
             ) {
                 item {
                     RegisterAsDonorCard(
-                        bloodDonorProfileState = bloodDonorProfileState,
-                        onRegisterCardClick = {
-                            onRegisterClick()
-                        }
+                        onClick = {
+                           if (!bloodDonorProfileState.isBloodDonorProfileExists)  onRegisterClick() else onGoToProfileClick()
+                        },
+                        text = if (!bloodDonorProfileState.isBloodDonorProfileExists) "Register as Blood Donor" else "View Profile"
                     )
                 }
                 items(donorList) {
