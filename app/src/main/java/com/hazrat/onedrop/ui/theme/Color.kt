@@ -29,12 +29,12 @@ val onPrimaryContainerDark = Color(0xFFFFFFFF)
 
 val secondaryDark = Color(0xFFFF5C58)
 val onSecondaryDark = Color(0xFFFFFFFF)
-val secondaryContainerDark = Color(0xFFB53C3C)
+val secondaryContainerDark = Color(0xFF2A2A2A)
 val onSecondaryContainerDark = Color(0xFFFFEBEE)
 
 val backgroundDark = Color(0xFF0E0D0D)
 val onBackgroundDark = Color(0xFFFFEBEE)
-val surfaceDark = Color(0xFF171313)
+val surfaceDark =  Color(0xFF171313)
 val onSurfaceDark = Color(0xFFFFEBEE)
 
 // Error Colors

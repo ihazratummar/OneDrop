@@ -64,7 +64,7 @@ import kotlinx.coroutines.delay
  */
 
 @Composable
-fun MobileNumberTextField(
+fun CustomTextField(
     modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,

@@ -2,6 +2,7 @@ package com.hazrat.onedrop.core.presentation.component
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -36,7 +37,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.hazrat.onedrop.R
 import com.hazrat.onedrop.auth.presentation.ProfileState
+import com.hazrat.onedrop.core.domain.model.BloodDonorModel
+import com.hazrat.onedrop.core.domain.model.BloodGroup
 import com.hazrat.onedrop.core.navigation.Route
+import com.hazrat.onedrop.core.presentation.blood_donor_screen.BloodDonorProfileState
 import com.hazrat.onedrop.ui.theme.dimens
 
 /**
@@ -59,7 +63,7 @@ fun HomePageHeaderCard(
                 .fillMaxWidth()
                 .height(dimens.size250),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
             )
         ) {
@@ -113,7 +117,7 @@ fun ProfileAndIcons(
     ) {
         Column {
             Text(
-                text = profileState.userData?.fullName?:"",
+                text = profileState.userData?.fullName ?: "",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -141,7 +145,8 @@ fun ProfileAndIcons(
 
 @Composable
 fun HomeActivityGrid(
-    onActivityClick: (ActivityAs) -> Unit
+    onActivityClick: (ActivityAs) -> Unit,
+    bloodDonorList: List<BloodDonorModel>
 ) {
     Row(
         modifier = Modifier
@@ -151,7 +156,7 @@ fun HomeActivityGrid(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         val activity = listOf(
-            ActivityAs.BloodDonor,
+            ActivityAs.BloodDonor(bloodDonorList),
             ActivityAs.RequestBlood,
         )
         activity.forEach {
@@ -191,7 +196,7 @@ fun BloodGroupCard(
     }
 }
 
-@Preview
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ActivityCards(
@@ -290,36 +295,171 @@ fun HomePageSectionHeading(
 }
 
 
-sealed class BloodGroup(val name: String, val icon: Int) {
-    data object APositive : BloodGroup(name = "A+", icon = R.drawable.a_plus)
-    data object ANegative : BloodGroup(name = "A-", icon = R.drawable.a_minus)
-    data object BPositive : BloodGroup(name = "B+", icon = R.drawable.b_plus)
-    data object BNegative : BloodGroup(name = "B-", icon = R.drawable.b_minus)
-    data object ABPositive : BloodGroup(name = "AB+", icon = R.drawable.ab_plus)
-    data object ABNegative : BloodGroup(name = "AB-", icon = R.drawable.ab_minus)
-    data object OPositive : BloodGroup(name = "O+", icon = R.drawable.o_plus)
-    data object ONegative : BloodGroup(name = "O-", icon = R.drawable.o_minus)
-}
-
 sealed class ActivityAs(
     val icon: Int,
     val title: String,
     val subText: String,
     val route: Route
 ) {
-    data object BloodDonor : ActivityAs(
+    data class BloodDonor(val bloodDonorList: List<BloodDonorModel>) : ActivityAs(
         icon = R.drawable.blood_donor,
         title = "Blood Donor",
-        subText = "120 Posts",
+        subText = bloodDonorList.size.toString(),
         route = Route.BloodDonorRoute
     )
 
 
     data object RequestBlood : ActivityAs(
-        icon = R.drawable.create_post,
+        icon = R.drawable.request_blood,
         title = "Request Blood",
         subText = "3 steps",
         route = Route.RequestBloodRoute
     )
+
+}
+
+
+@Composable
+fun BasicAppBar(
+    modifier: Modifier = Modifier,
+    onBackClick: () -> Unit,
+    title: String,
+    action: @Composable () -> Unit
+) {
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = dimens.size10),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.arrowleft),
+            contentDescription = null,
+            modifier = Modifier
+                .clickable { onBackClick() }
+                .padding(dimens.size10)
+        )
+        Spacer(Modifier.width(dimens.size10))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(Modifier.weight(1f))
+        action()
+    }
+
+}
+
+
+@Composable
+fun BloodDonorsCards(
+    isContactPrivate: Boolean = false,
+    isAddressPrivate: Boolean = false,
+    donorList: BloodDonorModel = BloodDonorModel()
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = dimens.size10, horizontal = dimens.size8),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        ),
+    ) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(dimens.size10),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = when (donorList.bloodGroup) {
+                    BloodGroup.A_POSITIVE -> painterResource(R.drawable.a_plus)
+                    BloodGroup.A_NEGATIVE -> painterResource(R.drawable.a_minus)
+                    BloodGroup.B_POSITIVE -> painterResource(R.drawable.b_plus)
+                    BloodGroup.B_NEGATIVE -> painterResource(R.drawable.b_minus)
+                    BloodGroup.AB_POSITIVE -> painterResource(R.drawable.ab_plus)
+                    BloodGroup.AB_NEGATIVE -> painterResource(R.drawable.ab_minus)
+                    BloodGroup.O_POSITIVE -> painterResource(R.drawable.o_plus)
+                    BloodGroup.O_NEGATIVE -> painterResource(R.drawable.o_minus)
+                },
+                contentDescription = null,
+                modifier = Modifier
+                    .size(dimens.size60),
+                tint = Color.Unspecified
+            )
+            Spacer(Modifier.width(dimens.size20))
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    donorList.name,
+                    style = MaterialTheme.typography.titleLarge
+                )
+                if (!isContactPrivate) {
+                    Text(
+                        donorList.contactNumber,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+                if (!isAddressPrivate) {
+                    Text(
+                        "${donorList.district} , ${donorList.state}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalFoundationApi::class)
+@Preview
+@Composable
+fun RegisterAsDonorCard(
+    modifier: Modifier = Modifier,
+    bloodDonorProfileState: BloodDonorProfileState = BloodDonorProfileState(false, false),
+    onRegisterCardClick: () -> Unit = {},
+    goToProfile: () -> Unit = {}
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(dimens.size10)
+            .combinedClickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = { if (!bloodDonorProfileState.isBloodDonorProfileExists) onRegisterCardClick() else goToProfile() }
+            ),
+        colors = CardDefaults.cardColors(
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        ),
+        shape = RoundedCornerShape(dimens.size10)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = dimens.size10, vertical = dimens.size20),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = if (!bloodDonorProfileState.isBloodDonorProfileExists) "Register as a blood donor?" else "Go to your donor Profile",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Spacer(Modifier.width(dimens.size35))
+            Icon(
+                painter = painterResource(R.drawable.onedrop_logo), null,
+                modifier = Modifier.size(dimens.size30),
+                tint = Color.Unspecified
+            )
+            Spacer(Modifier.weight(1f))
+        }
+    }
 
 }

@@ -29,6 +29,9 @@ sealed class Route {
     @Serializable
     data object RequestBloodRoute : Route()
 
+    @Serializable
+    data object CreateBloodDonorProfileRoute : Route()
+
 
 }
 
@@ -41,11 +44,11 @@ sealed class BottomNavigation<T>(val icon: Int, val fillIcon: Int, val name: Str
         route = Route.HomeRoute
     )
 
-    data object SearchNav : BottomNavigation<Route.SearchRoute>(
-        icon = R.drawable.outline_search,
-        fillIcon = R.drawable.search_filled,
-        name = "Search",
-        route = Route.SearchRoute
+    data object RequestBloodNav : BottomNavigation<Route.RequestBloodRoute>(
+        icon = R.drawable.request_blood_outline,
+        fillIcon = R.drawable.request_blood,
+        name = "Request Blood",
+        route = Route.RequestBloodRoute
     )
 
     data object MoreNav : BottomNavigation<Route.MoreRoute>(
