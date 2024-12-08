@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class BloodDonorModel(
-    val userId: String = "",  // Default value
+    var userId: String = "",  // Default value
     val name: String = "",  // Default value
     val bloodGroup: BloodGroup = BloodGroup.A_POSITIVE,  // Assuming default blood group
     val district: String = "",  // Default value

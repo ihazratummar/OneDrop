@@ -87,8 +87,6 @@ fun CreateBloodDonorScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
-
-
                 item {
                     Spacer(Modifier.height(dimens.size150))
                 }

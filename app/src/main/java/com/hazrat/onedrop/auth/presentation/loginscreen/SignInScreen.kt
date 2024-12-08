@@ -54,6 +54,7 @@ fun SignInScreen(
     signInEvent: (SignInEvent) -> Unit,
     userEvent: UserEvent?,
     snackBarHostState: SnackbarHostState,
+    refreshDonorProfile: () -> Unit
 ) {
 
     val context = LocalContext.current
@@ -136,6 +137,7 @@ fun SignInScreen(
                         onDone = {
                             keyboardController?.hide()
                             signInEvent(SignInEvent.SignIn)
+                            refreshDonorProfile()
                         }
                     ),
                     isPasswordVisible = !signInState.isPasswordVisible,
@@ -152,6 +154,7 @@ fun SignInScreen(
                     onButtonClick = {
                         keyboardController?.hide()
                         signInEvent(SignInEvent.SignIn)
+                        refreshDonorProfile()
                     },
                     isButtonEnabled = signInState.isFormValid,
                     isLoadings = signInState.isLoading
@@ -168,6 +171,7 @@ fun SignInScreen(
                         onButtonClick = {
                             authEvent(AuthEvent.SetActivityContext(activity))
                             authEvent(AuthEvent.LoginWithGoogleCredential)
+                            refreshDonorProfile()
                         },
                         textColor = Color(0xffea4335)
                     )
@@ -178,7 +182,10 @@ fun SignInScreen(
                 BottomText(
                     messageText = "Don't have an account?",
                     buttonText = "Sign Up",
-                    onButtonClick = { onSignUpButtonClick() }
+                    onButtonClick = {
+                        onSignUpButtonClick()
+
+                    }
                 )
             }
         }

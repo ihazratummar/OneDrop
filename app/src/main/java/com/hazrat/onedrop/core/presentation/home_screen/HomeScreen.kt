@@ -5,18 +5,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshState
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.hazrat.onedrop.auth.presentation.AuthEvent
 import com.hazrat.onedrop.auth.presentation.ProfileState
 import com.hazrat.onedrop.core.domain.model.BloodDonorModel
 import com.hazrat.onedrop.core.presentation.component.ActivityAs
@@ -33,9 +23,8 @@ import com.hazrat.onedrop.ui.theme.dimens
 fun HomeScreen(
     modifier: Modifier = Modifier,
     onActivityClick: (ActivityAs) -> Unit,
-    authEvent: (AuthEvent) -> Unit,
     profileState: ProfileState,
-    bloodDonorList: List<BloodDonorModel>
+    bloodDonorList: List<BloodDonorModel>,
 ) {
 
 

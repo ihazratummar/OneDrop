@@ -3,6 +3,7 @@ package com.hazrat.onedrop.core.navigation
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
@@ -35,7 +36,7 @@ fun NavGraphBuilder.contentNavigation(
     navigation<RootNav>(startDestination = Route.HomeRoute) {
 
         composable<Route.HomeRoute> {
-            val donorList by bloodDonorViewModel.donorList.collectAsState()
+            val donorList by bloodDonorViewModel.allBloodDonorList.collectAsState()
             HomeScreen(
                 onActivityClick = { route ->
                     navController.navigate(route.route) {
@@ -46,14 +47,16 @@ fun NavGraphBuilder.contentNavigation(
                         restoreState = true
                     }
                 },
-                authEvent = authEvent,
                 profileState = profileState,
                 bloodDonorList = donorList
             )
         }
         composable<Route.MoreRoute> {
             MoreScreen(
-                authEvent = authEvent
+                authEvent = authEvent,
+                clearAllState = {
+                    bloodDonorViewModel.clearAllState()
+                }
             )
         }
         composable<Route.RequestBloodRoute> {
@@ -61,17 +64,20 @@ fun NavGraphBuilder.contentNavigation(
         }
 
         composable<Route.BloodDonorRoute> {
-            val donorList by bloodDonorViewModel.donorList.collectAsState()
+            val donorList by bloodDonorViewModel.donorListWithoutCurrentUser.collectAsState()
             val bloodDonorProfileState by bloodDonorViewModel.bloodDonorProfileState.collectAsState()
+            val channelEvent by bloodDonorViewModel.events.collectAsState(initial = null)
             BloodDonorScreen(
                 bloodDonorEvent = bloodDonorViewModel::onEvent,
                 donorList = donorList,
                 bloodDonorProfileState = bloodDonorProfileState,
                 onBackClick = { navController.popBackStack() },
-                onRegisterClick = {navController.navigate(CreateBloodDonorProfileRoute)}
+                onRegisterClick = { navController.navigate(CreateBloodDonorProfileRoute) },
+                bloodDonorChannelEvent = channelEvent,
+                snackBarHostState = snackbarHostState
             )
         }
-        composable<CreateBloodDonorProfileRoute>{
+        composable<CreateBloodDonorProfileRoute> {
             val bloodDonorModel by bloodDonorViewModel.bloodDonorProfile.collectAsState()
             val bloodDonorProfileState by bloodDonorViewModel.bloodDonorProfileState.collectAsState()
             CreateBloodDonorScreen(

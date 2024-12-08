@@ -47,3 +47,4 @@ object MainAppModule {
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class ApplicationScope
+

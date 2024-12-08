@@ -1,15 +1,22 @@
 package com.hazrat.onedrop.core.presentation.blood_donor_screen
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.hazrat.onedrop.core.domain.model.BloodDonorModel
 import com.hazrat.onedrop.core.domain.repository.BloodDonorRepository
+import com.hazrat.onedrop.core.presentation.blood_donor_screen.BloodDonorChannelEvent.*
+import com.hazrat.onedrop.util.UiText
 import com.hazrat.onedrop.util.datastore.DataStorePreference
+import com.hazrat.onedrop.util.results.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -26,42 +33,62 @@ class BloodDonorViewModel @Inject constructor(
     firebaseAuth: FirebaseAuth
 ) : ViewModel() {
 
-    private val _donorList = MutableStateFlow<List<BloodDonorModel>>(emptyList())
-    val donorList: StateFlow<List<BloodDonorModel>> = _donorList.asStateFlow()
+    private val _donorListWithoutCurrentUser = MutableStateFlow<List<BloodDonorModel>>(emptyList())
+    val donorListWithoutCurrentUser: StateFlow<List<BloodDonorModel>> =
+        _donorListWithoutCurrentUser.asStateFlow()
+
+    private val _allBloodDonorList = MutableStateFlow<List<BloodDonorModel>>(emptyList())
+    val allBloodDonorList: StateFlow<List<BloodDonorModel>> = _allBloodDonorList.asStateFlow()
 
     private val _bloodDonorProfile = MutableStateFlow(BloodDonorModel())
     val bloodDonorProfile: StateFlow<BloodDonorModel> = _bloodDonorProfile.asStateFlow()
 
-    private val _bloodDonorProfileState = MutableStateFlow(
-        BloodDonorProfileState(
-            isBloodDonorProfileExists = dataStorePreference.getBloodDonorRegistered()
-        )
-
-    )
-
-    val userId = firebaseAuth.currentUser?.uid
-
+    private val _bloodDonorProfileState =
+        MutableStateFlow(BloodDonorProfileState(isBloodDonorProfileExists = dataStorePreference.getBloodDonorRegistered()))
     val bloodDonorProfileState: StateFlow<BloodDonorProfileState> =
         _bloodDonorProfileState.asStateFlow()
 
+    private val eventChannel = Channel<BloodDonorChannelEvent>()
+    val events = eventChannel.receiveAsFlow()
+
     init {
-        getListOfDonors()
+        getListOfDonorsWithoutCurrentUser()
+        refreshProfileState()
+        getListOfAllDonors()
+        firebaseAuth.addAuthStateListener { auth ->
+            val userId = auth.currentUser?.uid
+            _bloodDonorProfile.value.userId = userId.toString()
+        }
     }
 
     fun refreshProfileState() {
         viewModelScope.launch {
-            repository.isBloodDonorProfileExists().collect { state ->
+            delay(1000)
+            repository.isBloodDonorProfileExists(userId = _bloodDonorProfile.value.userId).collect { state ->
                 _bloodDonorProfileState.update {
                     it.copy(isBloodDonorProfileExists = state)
                 }
+                dataStorePreference.setBloodDonorRegistered(state)
+                Log.d(
+                    "bloodDonorState",
+                    "refreshProfileState: $state ${_bloodDonorProfile.value.userId}"
+                )
             }
         }
     }
 
-    fun getListOfDonors() {
+    fun getListOfAllDonors() {
         viewModelScope.launch {
-            repository.getListOfDonors().collect {
-                _donorList.value = it
+            repository.getListOfAllDonors().collect { donors ->
+                _allBloodDonorList.value = donors
+            }
+        }
+    }
+
+    fun getListOfDonorsWithoutCurrentUser() {
+        viewModelScope.launch {
+            repository.getListOfDonorsWithoutCurrentUser(userId = _bloodDonorProfile.value.userId).collect {
+                _donorListWithoutCurrentUser.value = it
             }
         }
     }
@@ -136,21 +163,34 @@ class BloodDonorViewModel @Inject constructor(
 
             BloodDonorEvent.CreateBloodDonorProfile -> {
                 viewModelScope.launch {
-                    repository.createBloodDonorProfile(
+                    val result = repository.createBloodDonorProfile(
                         bloodDonorModel = BloodDonorModel(
-                            userId = this@BloodDonorViewModel.userId.toString(),
+                            userId =  _bloodDonorProfile.value.userId,
                             name = _bloodDonorProfile.value.name,
                             bloodGroup = _bloodDonorProfile.value.bloodGroup,
                             available = _bloodDonorProfile.value.available,
-                            contactNumber = _bloodDonorProfile.value.contactNumber,
+                            contactNumber =  _bloodDonorProfile.value.contactNumber,
                             district = _bloodDonorProfile.value.district,
                             isContactNumberPrivate = _bloodDonorProfile.value.isContactNumberPrivate,
                             notificationEnabled = _bloodDonorProfile.value.notificationEnabled,
                             notificationScope = _bloodDonorProfile.value.notificationScope,
                         )
                     )
+
+                    when (result) {
+                        is Result.Error -> {
+                            val errorMessage = result.error.asUiText()
+                            eventChannel.send(Error(errorMessage))
+                        }
+
+                        is Result.Success -> {
+                            val successMessage = result.data.asSuccessUiText()
+                            eventChannel.send(Success(successMessage))
+                        }
+                    }
                     refreshProfileState()
-                    getListOfDonors()
+                    getListOfDonorsWithoutCurrentUser()
+                    getListOfAllDonors()
                 }
             }
 
@@ -169,7 +209,35 @@ class BloodDonorViewModel @Inject constructor(
                     )
                 }
             }
+
+            BloodDonorEvent.Refresh -> {
+                refreshProfileState()
+                getListOfDonorsWithoutCurrentUser()
+                getListOfAllDonors()
+            }
         }
     }
 
+
+    fun clearAllState() {
+        // Resetting the blood donor profile to its default state
+        _bloodDonorProfile.value = BloodDonorModel()  // or initialize with defaults if necessary
+
+        // Resetting the blood donor profile state
+        _bloodDonorProfileState.value = BloodDonorProfileState(isBloodDonorProfileExists = false)
+
+        // Resetting the lists
+        _donorListWithoutCurrentUser.value = emptyList()
+        _allBloodDonorList.value = emptyList()
+
+        // Resetting any other necessary properties as needed
+        Log.d("bloodDonorState", "All states cleared.")
+    }
+
+}
+
+
+sealed interface BloodDonorChannelEvent {
+    data class Success(val success: UiText) : BloodDonorChannelEvent
+    data class Error(val error: UiText) : BloodDonorChannelEvent
 }

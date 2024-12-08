@@ -1,11 +1,9 @@
 package com.hazrat.onedrop.auth.presentation.loginscreen
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hazrat.onedrop.auth.domain.repository.AuthRepository
 import com.hazrat.onedrop.auth.domain.usecase.ProfileUseCase
-import com.hazrat.onedrop.auth.presentation.AuthState
 import com.hazrat.onedrop.auth.util.asSuccessUiText
 import com.hazrat.onedrop.auth.util.asUiText
 import com.hazrat.onedrop.util.UiText
@@ -37,8 +35,6 @@ class SignInViewMode @Inject constructor(
     private val _signInState = MutableStateFlow(SignInState())
     val signState: StateFlow<SignInState> = _signInState.asStateFlow()
 
-
-    val authState: LiveData<AuthState> = authRepository.authState
 
     init {
         authRepository.checkAuthStatus()
@@ -121,8 +117,6 @@ class SignInViewMode @Inject constructor(
                     }
                 }
                 validateForm()
-
-
             }
 
             SignInEvent.SignIn -> {
@@ -151,11 +145,12 @@ class SignInViewMode @Inject constructor(
                             eventChannel.send(UserEvent.Success(successMessage))
                             delay(2000L)
                             _signInState.update { it.copy(isLoading = false) }
-
                         }
                     }
-                }
 
+
+
+                }
             }
 
             SignInEvent.TogglePasswordVisibility -> {

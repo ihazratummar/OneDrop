@@ -35,6 +35,7 @@ android {
 
 
         buildConfigField("String","GOOGLE_SIGN_WEB_SDK_CLIENT", localProperties.getProperty("GOOGLE_SIGN_WEB_SDK_CLIENT"))
+        buildConfigField("String","KEYSTORE_KEY_ALIAS", localProperties.getProperty("KEYSTORE_KEY_ALIAS"))
     }
 
 

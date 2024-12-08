@@ -8,14 +8,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -80,8 +81,8 @@ class MainActivity : ComponentActivity() {
                     val bottomPadding = it.calculateBottomPadding()
                     val authViewModel: AuthViewModel = hiltViewModel()
                     val bloodDonorViewModel: BloodDonorViewModel = hiltViewModel()
-                    val authState =
-                        authViewModel.authState.observeAsState(initial = AuthState.Loading)
+                    val bloodDonorRegistered by bloodDonorViewModel.bloodDonorProfileState.collectAsState()
+                    val authState = authViewModel.authState.observeAsState(initial = AuthState.Loading)
                     val profileState = authViewModel.profileState.collectAsState()
                     val authEvent = authViewModel::event
                     if (authState.value == AuthState.Loading || !isConnected.value) {

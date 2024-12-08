@@ -46,7 +46,8 @@ fun SignUpScreen(
     onSignInButtonClick: () -> Unit,
     authEvent: (AuthEvent) -> Unit,
     signUpState: SignUpState,
-    signUpEvent: (SignUpEvent) -> Unit
+    signUpEvent: (SignUpEvent) -> Unit,
+    refreshDonorProfile:() -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val context = LocalContext.current
@@ -117,6 +118,7 @@ fun SignUpScreen(
                         onDone = {
                             keyboardController?.hide()
                             signUpEvent(SignUpEvent.SignUp)
+                            refreshDonorProfile()
                         }
                     ),
                     isTrailingForPassword = true,
@@ -133,6 +135,7 @@ fun SignUpScreen(
                     onButtonClick = {
                         keyboardController?.hide()
                         signUpEvent(SignUpEvent.SignUp)
+                        refreshDonorProfile()
                     },
                     isButtonEnabled = signUpState.isFormValid,
                     isLoadings = signUpState.isLoading
@@ -149,6 +152,7 @@ fun SignUpScreen(
                         onButtonClick = {
                             authEvent(AuthEvent.SetActivityContext(activity))
                             authEvent(AuthEvent.LoginWithGoogleCredential)
+                            refreshDonorProfile()
                         },
                         textColor = Color(0xffea4335)
                     )

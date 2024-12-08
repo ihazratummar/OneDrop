@@ -18,7 +18,8 @@ import com.hazrat.onedrop.auth.presentation.AuthEvent
 @Composable
 fun MoreScreen(
     modifier: Modifier = Modifier,
-    authEvent: (AuthEvent) -> Unit
+    authEvent: (AuthEvent) -> Unit,
+    clearAllState: () -> Unit
 ) {
     Column(
         modifier = modifier.fillMaxSize(),
@@ -26,7 +27,10 @@ fun MoreScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(
-            onClick = { authEvent(AuthEvent.SignOut) }
+            onClick = {
+                authEvent(AuthEvent.SignOut)
+                clearAllState()
+            }
         ) {
             Text("Sign Out")
         }

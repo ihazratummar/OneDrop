@@ -28,6 +28,7 @@ import com.hazrat.onedrop.auth.presentation.AuthState
 import com.hazrat.onedrop.auth.presentation.ProfileState
 import com.hazrat.onedrop.core.navigation.BottomNavigation
 import com.hazrat.onedrop.core.navigation.contentNavigation
+import com.hazrat.onedrop.core.presentation.blood_donor_screen.BloodDonorEvent
 import com.hazrat.onedrop.core.presentation.blood_donor_screen.BloodDonorViewModel
 import kotlinx.serialization.Serializable
 
@@ -39,7 +40,7 @@ fun AppNavigation(
     snackbarHostState: SnackbarHostState,
     authState: AuthState,
     authEvent: (AuthEvent) -> Unit,
-    bloodDonorViewModel: BloodDonorViewModel
+    bloodDonorViewModel: BloodDonorViewModel,
 ) {
 
 
@@ -48,6 +49,7 @@ fun AppNavigation(
         navController = navHostController,
         startDestination = MasterRoot.RootNav
     ) {
+        val bloodDonorEvent = bloodDonorViewModel::onEvent
         if (authState == AuthState.Authenticated) {
             contentNavigation(
                 snackbarHostState = snackbarHostState,
@@ -60,6 +62,10 @@ fun AppNavigation(
             authNavigation(
                 navController = navHostController,
                 snackbarHostState = snackbarHostState,
+                refreshDonorProfile = {
+                    bloodDonorEvent(BloodDonorEvent.Refresh)
+                }
+
             )
         }
     }

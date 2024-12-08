@@ -2,9 +2,11 @@ package com.hazrat.onedrop.auth.presentation.signup_screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.hazrat.onedrop.auth.domain.repository.AuthRepository
 import com.hazrat.onedrop.auth.domain.usecase.ProfileUseCase
 import com.hazrat.onedrop.auth.presentation.AuthState
+import com.hazrat.onedrop.core.domain.repository.BloodDonorRepository
 import com.hazrat.onedrop.util.results.PasswordValidationError
 import com.hazrat.onedrop.util.results.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,12 +26,19 @@ import javax.inject.Inject
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
     private val profileUseCase: ProfileUseCase,
-    authRepository: AuthRepository
+    authRepository: AuthRepository,
+    private val bloodDonorRepository: BloodDonorRepository,
+    firebaseAuth: FirebaseAuth
 ) : ViewModel() {
 
 
+    var userId = ""
     init {
         authRepository.checkAuthStatus()
+        firebaseAuth.addAuthStateListener{auth ->
+            val userIdAuth = auth.currentUser?.uid
+            userId = userIdAuth.toString()
+        }
     }
 
     private val _signUpState = MutableStateFlow(
@@ -147,13 +156,12 @@ class SignUpViewModel @Inject constructor(
                         is Result.Error -> {
                             _signUpState.update { it.copy(isLoading = false) }
                         }
-
                         is Result.Success -> {
                             delay(2000L)
                             _signUpState.update { it.copy(isLoading = false) }
+                            bloodDonorRepository.isBloodDonorProfileExists(userId)
                         }
                     }
-
 
                 }
             }

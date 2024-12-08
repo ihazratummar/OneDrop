@@ -15,9 +15,11 @@ interface BloodDonorRepository {
 
     suspend fun createBloodDonorProfile(bloodDonorModel: BloodDonorModel) : Result<BloodDonorProfileSuccess , BloodDonorProfileError>
 
-    suspend fun getListOfDonors(): Flow<List<BloodDonorModel>>
+    suspend fun getListOfDonorsWithoutCurrentUser(userId: String): Flow<List<BloodDonorModel>>
 
-    suspend fun isBloodDonorProfileExists(): Flow<Boolean>
+    suspend fun isBloodDonorProfileExists(userId: String): Flow<Boolean>
+
+    suspend fun getListOfAllDonors(): Flow<List<BloodDonorModel>>
 
 
 }
