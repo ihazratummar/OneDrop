@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -28,17 +29,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import com.hazrat.onedrop.R
 import com.hazrat.onedrop.auth.presentation.ProfileState
+import com.hazrat.onedrop.auth.presentation.common.buttonShimmerEffect
 import com.hazrat.onedrop.core.domain.model.BloodDonorModel
 import com.hazrat.onedrop.core.domain.model.BloodGroup
-import com.hazrat.onedrop.core.navigation.Route
+import com.hazrat.onedrop.core.navigation.MainRoute
 import com.hazrat.onedrop.ui.theme.dimens
 
 /**
@@ -297,13 +301,13 @@ sealed class ActivityAs(
     val icon: Int,
     val title: String,
     val subText: String,
-    val route: Route
+    val route: MainRoute
 ) {
     data class BloodDonor(val bloodDonorList: List<BloodDonorModel>) : ActivityAs(
         icon = R.drawable.blood_donor,
         title = "Blood Donor",
         subText = bloodDonorList.size.toString(),
-        route = Route.BloodDonorRoute
+        route = MainRoute.BloodDonorRoute
     )
 
 
@@ -311,7 +315,7 @@ sealed class ActivityAs(
         icon = R.drawable.request_blood,
         title = "Request Blood",
         subText = "3 steps",
-        route = Route.RequestBloodRoute
+        route = MainRoute.RequestBloodScreenRoute
     )
 
 }
@@ -355,12 +359,17 @@ fun BasicAppBar(
 fun BloodDonorsCards(
     isContactPrivate: Boolean = false,
     isAddressPrivate: Boolean = false,
-    donorList: BloodDonorModel = BloodDonorModel()
+    donorList: BloodDonorModel = BloodDonorModel(),
+    onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = dimens.size10, horizontal = dimens.size8),
+            .clickable{
+                onClick()
+            }
+            .height(dimens.size150)
+            .padding(vertical = dimens.size5, horizontal = dimens.size8),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -369,7 +378,7 @@ fun BloodDonorsCards(
 
         Row(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .padding(dimens.size10),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -383,6 +392,7 @@ fun BloodDonorsCards(
                     BloodGroup.AB_NEGATIVE -> painterResource(R.drawable.ab_minus)
                     BloodGroup.O_POSITIVE -> painterResource(R.drawable.o_plus)
                     BloodGroup.O_NEGATIVE -> painterResource(R.drawable.o_minus)
+                    null -> painterResource(R.drawable.onedrop_logo)
                 },
                 contentDescription = null,
                 modifier = Modifier
@@ -391,7 +401,10 @@ fun BloodDonorsCards(
             )
             Spacer(Modifier.width(dimens.size20))
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceAround
             ) {
                 Text(
                     donorList.name,
@@ -405,7 +418,7 @@ fun BloodDonorsCards(
                 }
                 if (!isAddressPrivate) {
                     Text(
-                        "${donorList.district} , ${donorList.state}",
+                        "${donorList.city} , ${donorList.district} , ${donorList.state}",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -415,12 +428,11 @@ fun BloodDonorsCards(
 }
 
 
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RegisterAsDonorCard(
     modifier: Modifier = Modifier,
-    onClick:() -> Unit,
+    onClick: () -> Unit,
     text: String = "Register as a blood donor?"
 ) {
     Card(
@@ -459,4 +471,65 @@ fun RegisterAsDonorCard(
         }
     }
 
+}
+
+
+@Preview
+@Composable
+fun CardLoadingAnimation() {
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(dimens.size150)
+            .padding(vertical = dimens.size5, horizontal = dimens.size8),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+        ),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(dimens.size10),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .buttonShimmerEffect(isRounded = true)
+                    .size(dimens.size60)
+            )
+
+            Spacer(Modifier.width(dimens.size20))
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceAround
+
+            ) {
+                Box(
+                    modifier = Modifier
+                        .padding(vertical = dimens.size10)
+                        .fillMaxWidth(fraction = 0.8f)
+                        .height(dimens.size20)
+                        .buttonShimmerEffect()
+                )
+                Box(
+                    modifier = Modifier
+                        .padding(vertical = dimens.size10)
+                        .fillMaxWidth(fraction = 0.5f)
+                        .height(dimens.size15)
+                        .buttonShimmerEffect()
+                )
+                Box(
+                    modifier = Modifier
+                        .padding(vertical = dimens.size10)
+                        .fillMaxWidth()
+                        .height(dimens.size10)
+                        .buttonShimmerEffect()
+                )
+
+            }
+        }
+    }
 }

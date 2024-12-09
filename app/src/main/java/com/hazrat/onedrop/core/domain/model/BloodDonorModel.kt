@@ -7,9 +7,10 @@ import kotlinx.serialization.Serializable
 data class BloodDonorModel(
     var userId: String = "",  // Default value
     val name: String = "",  // Default value
-    val bloodGroup: BloodGroup = BloodGroup.A_POSITIVE,  // Assuming default blood group
+    val bloodGroup: BloodGroup? = null,  // Assuming default blood group
+    val city: String = "",  // Default value
     val district: String = "",  // Default value
-    val state: State = State.WEST_BENGAL,  // Assuming default state
+    val state: State? = null,  // Assuming default state
     val available: Boolean = true,  // Default value
     val contactNumber: String = "",  // Default value
     val isContactNumberPrivate: Boolean = true,  // Default value

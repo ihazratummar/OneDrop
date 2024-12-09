@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -183,7 +184,7 @@ fun AuthenticationButton(
         colors = ButtonDefaults.buttonColors(
             containerColor = if (!isLoadings) MaterialTheme.colorScheme.primary else Color.Transparent,
             contentColor = MaterialTheme.colorScheme.onPrimary,
-            disabledContainerColor = if (!isLoadings) MaterialTheme.colorScheme.surfaceContainerHighest else Color.Transparent,
+            disabledContainerColor = if (!isLoadings) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
             disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
         enabled = isButtonEnabled
@@ -261,7 +262,9 @@ fun BottomText(
 }
 
 
-fun Modifier.buttonShimmerEffect(): Modifier = composed {
+fun Modifier.buttonShimmerEffect(
+    isRounded: Boolean = false
+): Modifier = composed {
     var size by remember {
         mutableStateOf(IntSize.Zero)
     }
@@ -276,14 +279,14 @@ fun Modifier.buttonShimmerEffect(): Modifier = composed {
     background(
         brush = Brush.linearGradient(
             colors = listOf(
-                MaterialTheme.colorScheme.surfaceContainerHighest,
+                MaterialTheme.colorScheme.secondaryContainer,
                 MaterialTheme.colorScheme.primary,
-                MaterialTheme.colorScheme.surfaceContainerHighest,
+                MaterialTheme.colorScheme.secondaryContainer,
             ),
             start = Offset(startOffsetX, 0F),
             end = Offset(startOffsetX + size.width.toFloat(), size.height.toFloat())
         ),
-        shape = RoundedCornerShape(dimens.size10)
+        shape = if (!isRounded) RoundedCornerShape(dimens.size10) else CircleShape
     ).onGloballyPositioned {
         size = it.size
     }

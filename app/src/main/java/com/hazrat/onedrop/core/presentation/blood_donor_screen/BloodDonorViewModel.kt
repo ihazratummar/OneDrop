@@ -40,8 +40,8 @@ class BloodDonorViewModel @Inject constructor(
     private val _allBloodDonorList = MutableStateFlow<List<BloodDonorModel>>(emptyList())
     val allBloodDonorList: StateFlow<List<BloodDonorModel>> = _allBloodDonorList.asStateFlow()
 
-    private val _bloodDonorProfile = MutableStateFlow(BloodDonorModel())
-    val bloodDonorProfile: StateFlow<BloodDonorModel> = _bloodDonorProfile.asStateFlow()
+    private val _bloodDonorModel = MutableStateFlow(BloodDonorModel())
+    val bloodDonorModel: StateFlow<BloodDonorModel> = _bloodDonorModel.asStateFlow()
 
     private val _bloodDonorProfileState =
         MutableStateFlow(BloodDonorProfileState(isBloodDonorProfileExists = dataStorePreference.getBloodDonorRegistered()))
@@ -57,23 +57,40 @@ class BloodDonorViewModel @Inject constructor(
         getListOfAllDonors()
         firebaseAuth.addAuthStateListener { auth ->
             val userId = auth.currentUser?.uid
-            _bloodDonorProfile.value.userId = userId.toString()
+            _bloodDonorModel.value.userId = userId.toString()
         }
     }
+
+    fun isFormValid() {
+        val profile = _bloodDonorModel.value
+        val isValid = profile.name.isNotBlank() &&
+                profile.contactNumber.isNotBlank() &&
+                profile.district.isNotBlank() &&
+                profile.contactNumber.length == 10 &&
+                profile.city.isNotBlank() &&
+                profile.bloodGroup != null &&
+                profile.state != null
+
+        _bloodDonorProfileState.update {
+            it.copy(isFormValid = isValid)
+        }
+    }
+
 
     fun refreshProfileState() {
         viewModelScope.launch {
             delay(1000)
-            repository.isBloodDonorProfileExists(userId = _bloodDonorProfile.value.userId).collect { state ->
-                _bloodDonorProfileState.update {
-                    it.copy(isBloodDonorProfileExists = state)
+            repository.isBloodDonorProfileExists(userId = _bloodDonorModel.value.userId)
+                .collect { state ->
+                    _bloodDonorProfileState.update {
+                        it.copy(isBloodDonorProfileExists = state)
+                    }
+                    dataStorePreference.setBloodDonorRegistered(state)
+                    Log.d(
+                        "bloodDonorState",
+                        "refreshProfileState: $state ${_bloodDonorModel.value.userId}"
+                    )
                 }
-                dataStorePreference.setBloodDonorRegistered(state)
-                Log.d(
-                    "bloodDonorState",
-                    "refreshProfileState: $state ${_bloodDonorProfile.value.userId}"
-                )
-            }
         }
     }
 
@@ -87,32 +104,39 @@ class BloodDonorViewModel @Inject constructor(
 
     fun getListOfDonorsWithoutCurrentUser() {
         viewModelScope.launch {
-            repository.getListOfDonorsWithoutCurrentUser(userId = _bloodDonorProfile.value.userId).collect {
-                _donorListWithoutCurrentUser.value = it
-            }
+            repository.getListOfDonorsWithoutCurrentUser(
+                userId = _bloodDonorModel.value.userId,
+                bloodGroup = _bloodDonorProfileState.value.selectedBloodGroup,
+                state = _bloodDonorProfileState.value.selectedState
+            )
+                .collect {
+                    _donorListWithoutCurrentUser.value = it
+                }
         }
     }
 
     fun onEvent(event: BloodDonorEvent) {
         when (event) {
             is BloodDonorEvent.SetName -> {
-                _bloodDonorProfile.update {
+                _bloodDonorModel.update {
                     it.copy(
                         name = event.name
                     )
                 }
+                isFormValid()
             }
 
             is BloodDonorEvent.SetBloodGroup -> {
-                _bloodDonorProfile.update {
+                _bloodDonorModel.update {
                     it.copy(
                         bloodGroup = event.bloodGroup
                     )
                 }
+                isFormValid()
             }
 
             is BloodDonorEvent.SetAvailable -> {
-                _bloodDonorProfile.update {
+                _bloodDonorModel.update {
                     it.copy(
                         available = event.available
                     )
@@ -120,25 +144,27 @@ class BloodDonorViewModel @Inject constructor(
             }
 
             is BloodDonorEvent.SetContactNumber -> {
-                _bloodDonorProfile.update {
+                _bloodDonorModel.update {
                     it.copy(
                         contactNumber = event.contactNumber
                     )
                 }
+                isFormValid()
             }
 
             BloodDonorEvent.SetContactNumberPrivate -> {
-                _bloodDonorProfile.update {
+                _bloodDonorModel.update {
                     it.copy(
-                        isContactNumberPrivate = !_bloodDonorProfile.value.isContactNumberPrivate
+                        isContactNumberPrivate = !_bloodDonorModel.value.isContactNumberPrivate
                     )
                 }
+                isFormValid()
             }
 
             BloodDonorEvent.SetNotificationEnabled -> {
-                _bloodDonorProfile.update {
+                _bloodDonorModel.update {
                     it.copy(
-                        notificationEnabled = !_bloodDonorProfile.value.notificationEnabled
+                        notificationEnabled = !_bloodDonorModel.value.notificationEnabled
                     )
                 }
             }
@@ -146,34 +172,38 @@ class BloodDonorViewModel @Inject constructor(
             BloodDonorEvent.SetNotificationScope -> TODO()
 
             is BloodDonorEvent.SetDistrict -> {
-                _bloodDonorProfile.update {
+                _bloodDonorModel.update {
                     it.copy(
                         district = event.district
                     )
                 }
+                isFormValid()
             }
 
             is BloodDonorEvent.SetState -> {
-                _bloodDonorProfile.update {
+                _bloodDonorModel.update {
                     it.copy(
                         state = event.state
                     )
                 }
+                isFormValid()
             }
 
             BloodDonorEvent.CreateBloodDonorProfile -> {
                 viewModelScope.launch {
                     val result = repository.createBloodDonorProfile(
                         bloodDonorModel = BloodDonorModel(
-                            userId =  _bloodDonorProfile.value.userId,
-                            name = _bloodDonorProfile.value.name,
-                            bloodGroup = _bloodDonorProfile.value.bloodGroup,
-                            available = _bloodDonorProfile.value.available,
-                            contactNumber =  _bloodDonorProfile.value.contactNumber,
-                            district = _bloodDonorProfile.value.district,
-                            isContactNumberPrivate = _bloodDonorProfile.value.isContactNumberPrivate,
-                            notificationEnabled = _bloodDonorProfile.value.notificationEnabled,
-                            notificationScope = _bloodDonorProfile.value.notificationScope,
+                            userId = _bloodDonorModel.value.userId,
+                            name = _bloodDonorModel.value.name,
+                            bloodGroup = _bloodDonorModel.value.bloodGroup,
+                            city = _bloodDonorModel.value.city,
+                            available = _bloodDonorModel.value.available,
+                            contactNumber = _bloodDonorModel.value.contactNumber,
+                            district = _bloodDonorModel.value.district,
+                            state = _bloodDonorModel.value.state,
+                            isContactNumberPrivate = _bloodDonorModel.value.isContactNumberPrivate,
+                            notificationEnabled = _bloodDonorModel.value.notificationEnabled,
+                            notificationScope = _bloodDonorModel.value.notificationScope,
                         )
                     )
 
@@ -211,9 +241,56 @@ class BloodDonorViewModel @Inject constructor(
             }
 
             BloodDonorEvent.Refresh -> {
+                viewModelScope.launch{
+                    _bloodDonorProfileState.update { it.copy(isLoading = true) }
+                    delay(1000)
+                    _bloodDonorProfileState.update { it.copy(isLoading = false) }
+                }
                 refreshProfileState()
                 getListOfDonorsWithoutCurrentUser()
                 getListOfAllDonors()
+            }
+
+            is BloodDonorEvent.SetCity -> {
+                _bloodDonorModel.update {
+                    it.copy(
+                        city = event.city
+                    )
+                }
+            }
+
+            BloodDonorEvent.ToggleBloodGroupFilter -> {
+                _bloodDonorProfileState.update {
+                    it.copy(
+                        isBloodGroupFilterOpen = !it.isBloodGroupFilterOpen
+                    )
+                }
+            }
+
+            is BloodDonorEvent.SetBloodGroupFilter -> {
+                _bloodDonorProfileState.update {
+                    it.copy(
+                        selectedBloodGroup = event.bloodGroup
+                    )
+                }
+                getListOfDonorsWithoutCurrentUser()
+            }
+
+            BloodDonorEvent.ToggleStateFilter -> {
+                _bloodDonorProfileState.update {
+                    it.copy(
+                        isStateFilterOpen = !it.isStateFilterOpen
+                    )
+                }
+            }
+
+            is BloodDonorEvent.SetStateFilter -> {
+                _bloodDonorProfileState.update {
+                    it.copy(
+                        selectedState = event.state
+                    )
+                }
+                getListOfDonorsWithoutCurrentUser()
             }
         }
     }
@@ -221,7 +298,7 @@ class BloodDonorViewModel @Inject constructor(
 
     fun clearAllState() {
         // Resetting the blood donor profile to its default state
-        _bloodDonorProfile.value = BloodDonorModel()  // or initialize with defaults if necessary
+        _bloodDonorModel.value = BloodDonorModel()  // or initialize with defaults if necessary
 
         // Resetting the blood donor profile state
         _bloodDonorProfileState.value = BloodDonorProfileState(isBloodDonorProfileExists = false)

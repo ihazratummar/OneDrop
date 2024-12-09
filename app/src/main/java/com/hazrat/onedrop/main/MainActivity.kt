@@ -101,7 +101,7 @@ class MainActivity : ComponentActivity() {
                             snackbarHostState = snackBarHostState,
                             authState = authState.value,
                             authEvent = authEvent,
-                            bloodDonorViewModel = bloodDonorViewModel
+                            bloodDonorViewModel = bloodDonorViewModel,
                         )
                     }
                 }

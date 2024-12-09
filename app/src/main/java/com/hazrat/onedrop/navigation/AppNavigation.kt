@@ -65,7 +65,6 @@ fun AppNavigation(
                 refreshDonorProfile = {
                     bloodDonorEvent(BloodDonorEvent.Refresh)
                 }
-
             )
         }
     }

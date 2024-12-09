@@ -14,6 +14,7 @@ sealed interface BloodDonorEvent {
     data class SetBloodGroup(val bloodGroup: BloodGroup) : BloodDonorEvent
     data class SetAvailable(val available: Boolean) : BloodDonorEvent
     data class SetContactNumber(val contactNumber: String) : BloodDonorEvent
+    data class SetCity(val city: String) : BloodDonorEvent
     data object SetContactNumberPrivate : BloodDonorEvent
     data object SetNotificationEnabled : BloodDonorEvent
     data object SetNotificationScope : BloodDonorEvent
@@ -27,5 +28,14 @@ sealed interface BloodDonorEvent {
     data object OnStateDropDownClick : BloodDonorEvent
 
     data object Refresh : BloodDonorEvent
+
+    data object ToggleBloodGroupFilter : BloodDonorEvent
+    data class SetBloodGroupFilter(val bloodGroup: BloodGroup) : BloodDonorEvent
+
+    data object ToggleStateFilter : BloodDonorEvent
+    data class SetStateFilter(val state: State) : BloodDonorEvent
+
+
+
 
 }

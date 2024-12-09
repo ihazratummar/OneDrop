@@ -3,6 +3,8 @@ package com.hazrat.onedrop.core.data.repository
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.hazrat.onedrop.core.domain.model.BloodDonorModel
+import com.hazrat.onedrop.core.domain.model.BloodGroup
+import com.hazrat.onedrop.core.domain.model.State
 import com.hazrat.onedrop.core.domain.repository.BloodDonorRepository
 import com.hazrat.onedrop.util.RootConstants.BLOOD_DONORS
 import com.hazrat.onedrop.util.results.BloodDonorProfileError
@@ -60,7 +62,7 @@ class BloodDonorRepositoryImpl @Inject constructor(
 
             for (document in querySnapshot.documents) {
                 val donor = document.toObject(BloodDonorModel::class.java)
-                donor?.let {donorsList.add(it)}
+                donor?.let { donorsList.add(it) }
             }
             Log.d("BloodDonorRepositoryImpl", "getting the list: ${donorsList.size}")
             emit(donorsList)
@@ -73,24 +75,31 @@ class BloodDonorRepositoryImpl @Inject constructor(
         emit(emptyList())
     }
 
-    override suspend fun getListOfDonorsWithoutCurrentUser(userId: String): Flow<List<BloodDonorModel>> = flow {
-            try {
-                val donorsList = mutableListOf<BloodDonorModel>()
-                val querySnapshot = firestore.collection(BLOOD_DONORS).get().await()
+    override suspend fun getListOfDonorsWithoutCurrentUser(
+        userId: String,
+        bloodGroup: BloodGroup?,
+        state: State?
+    ): Flow<List<BloodDonorModel>> = flow {
+        try {
+            val donorsList = mutableListOf<BloodDonorModel>()
+            val querySnapshot = firestore.collection(BLOOD_DONORS).get().await()
 
-                for (document in querySnapshot.documents) {
-                    val donor = document.toObject(BloodDonorModel::class.java)
-                    if (userId != donor?.userId) {
-                        donor?.let {donorsList.add(it)}
-                    }
+            for (document in querySnapshot.documents) {
+                val donor = document.toObject(BloodDonorModel::class.java)
+                if (userId != donor?.userId &&
+                    (bloodGroup == null || donor?.bloodGroup == bloodGroup) &&
+                    (state == null || donor?.state == state)
+                ) {
+                    donor?.let { donorsList.add(it) }
                 }
-                Log.d("BloodDonorRepositoryImpl", "getting the list: ${donorsList.size}")
-                emit(donorsList)
-            } catch (e: Exception) {
-                Log.d("BloodDonorRepositoryImpl", "Error getting the list: ${e.message}")
-                emit(emptyList())
             }
+            Log.d("BloodDonorRepositoryImpl", "getting the list: ${donorsList.size}")
+            emit(donorsList)
+        } catch (e: Exception) {
+            Log.d("BloodDonorRepositoryImpl", "Error getting the list: ${e.message}")
+            emit(emptyList())
         }
+    }
 
     override suspend fun isBloodDonorProfileExists(userId: String): Flow<Boolean> = flow {
         if (userId.isEmpty()) {
@@ -118,4 +127,24 @@ class BloodDonorRepositoryImpl @Inject constructor(
             emit(false)
         }
     }
+
+    override suspend fun getBloodDonorProfile(userId: String): Flow<BloodDonorModel> = flow {
+        try {
+            // Fetch the document from Firestore
+            val document = firestore.collection(BLOOD_DONORS).document(userId).get().await()
+            val donor = document.toObject(BloodDonorModel::class.java)
+
+            // Emit the donor profile if it matches the userId
+            if (userId == donor?.userId) {
+                emit(donor)
+            } else {
+                throw Exception("No donor found with the provided userId.")
+            }
+        } catch (e: Exception) {
+            // Log the error and re-emit it as an exception in the flow
+            Log.d("BloodDonorRepositoryImpl", "Error getting the donor profile: ${e.message}")
+            throw e
+        }
+    }
+
 }
