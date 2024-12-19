@@ -39,6 +39,11 @@ sealed class MainRoute {
     @Serializable
     data class BloodDonorsProfileScreenRoute(val userId: String) : MainRoute()
 
+    @Serializable
+    data object SelfProfileScreenRoute : MainRoute()
+
+    @Serializable
+    data object EditProfileScreenRoute : MainRoute()
 
 }
 

@@ -6,9 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.hazrat.onedrop.core.domain.model.BloodDonorModel
 import com.hazrat.onedrop.core.domain.repository.BloodDonorRepository
-import com.hazrat.onedrop.core.presentation.blood_donor_screen.BloodDonorChannelEvent.*
-import com.hazrat.onedrop.util.UiText
 import com.hazrat.onedrop.util.datastore.DataStorePreference
+import com.hazrat.onedrop.util.event.ChannelEvent
 import com.hazrat.onedrop.util.results.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -48,7 +47,7 @@ class BloodDonorViewModel @Inject constructor(
     val bloodDonorProfileState: StateFlow<BloodDonorProfileState> =
         _bloodDonorProfileState.asStateFlow()
 
-    private val eventChannel = Channel<BloodDonorChannelEvent>()
+    private val eventChannel = Channel<ChannelEvent>()
     val events = eventChannel.receiveAsFlow()
 
     init {
@@ -69,7 +68,9 @@ class BloodDonorViewModel @Inject constructor(
                 profile.contactNumber.length == 10 &&
                 profile.city.isNotBlank() &&
                 profile.bloodGroup != null &&
-                profile.state != null
+                profile.state != null &&
+                profile.age.isNotBlank() &&
+                profile.gender != null
 
         _bloodDonorProfileState.update {
             it.copy(isFormValid = isValid)
@@ -195,6 +196,8 @@ class BloodDonorViewModel @Inject constructor(
                         bloodDonorModel = BloodDonorModel(
                             userId = _bloodDonorModel.value.userId,
                             name = _bloodDonorModel.value.name,
+                            age = _bloodDonorModel.value.age,
+                            gender = _bloodDonorModel.value.gender,
                             bloodGroup = _bloodDonorModel.value.bloodGroup,
                             city = _bloodDonorModel.value.city,
                             available = _bloodDonorModel.value.available,
@@ -210,12 +213,12 @@ class BloodDonorViewModel @Inject constructor(
                     when (result) {
                         is Result.Error -> {
                             val errorMessage = result.error.asUiText()
-                            eventChannel.send(Error(errorMessage))
+                            eventChannel.send(ChannelEvent.Error(errorMessage))
                         }
 
                         is Result.Success -> {
                             val successMessage = result.data.asSuccessUiText()
-                            eventChannel.send(Success(successMessage))
+                            eventChannel.send(ChannelEvent.Success(successMessage))
                         }
                     }
                     refreshProfileState()
@@ -241,7 +244,7 @@ class BloodDonorViewModel @Inject constructor(
             }
 
             BloodDonorEvent.Refresh -> {
-                viewModelScope.launch{
+                viewModelScope.launch {
                     _bloodDonorProfileState.update { it.copy(isLoading = true) }
                     delay(1000)
                     _bloodDonorProfileState.update { it.copy(isLoading = false) }
@@ -268,10 +271,19 @@ class BloodDonorViewModel @Inject constructor(
             }
 
             is BloodDonorEvent.SetBloodGroupFilter -> {
-                _bloodDonorProfileState.update {
-                    it.copy(
-                        selectedBloodGroup = event.bloodGroup
-                    )
+                if (event.bloodGroup == _bloodDonorProfileState.value.selectedBloodGroup) {
+
+                    _bloodDonorProfileState.update {
+                        it.copy(
+                            selectedBloodGroup = null
+                        )
+                    }
+                } else {
+                    _bloodDonorProfileState.update {
+                        it.copy(
+                            selectedBloodGroup = event.bloodGroup
+                        )
+                    }
                 }
                 getListOfDonorsWithoutCurrentUser()
             }
@@ -285,12 +297,48 @@ class BloodDonorViewModel @Inject constructor(
             }
 
             is BloodDonorEvent.SetStateFilter -> {
-                _bloodDonorProfileState.update {
-                    it.copy(
-                        selectedState = event.state
-                    )
+                if (event.state == _bloodDonorProfileState.value.selectedState) {
+                    _bloodDonorProfileState.update {
+                        it.copy(
+                            selectedState = null
+                        )
+                    }
+                } else {
+                    _bloodDonorProfileState.update {
+                        it.copy(
+                            selectedState = event.state
+                        )
+                    }
                 }
                 getListOfDonorsWithoutCurrentUser()
+            }
+
+            is BloodDonorEvent.SetAge -> {
+                _bloodDonorModel.update {
+                    it.copy(
+                        age = event.age
+                    )
+                }
+                isFormValid()
+            }
+
+            is BloodDonorEvent.OnGenderDropDownClick -> {
+                _bloodDonorProfileState.update {
+                    it.copy(
+                        isGenderDropDownOpen = !it.isGenderDropDownOpen
+                    )
+                }
+            }
+
+            is BloodDonorEvent.SetGender -> {
+                _bloodDonorModel.update {
+                    it.copy(
+                        gender = event.gender
+                    )
+                }
+                if (_bloodDonorModel.value.age.isNotBlank() || _bloodDonorModel.value.age.isNotEmpty()) {
+                    isFormValid()
+                }
             }
         }
     }
@@ -311,10 +359,4 @@ class BloodDonorViewModel @Inject constructor(
         Log.d("bloodDonorState", "All states cleared.")
     }
 
-}
-
-
-sealed interface BloodDonorChannelEvent {
-    data class Success(val success: UiText) : BloodDonorChannelEvent
-    data class Error(val error: UiText) : BloodDonorChannelEvent
 }

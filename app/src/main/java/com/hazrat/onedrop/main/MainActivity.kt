@@ -28,6 +28,7 @@ import com.hazrat.onedrop.auth.presentation.AuthState
 import com.hazrat.onedrop.auth.presentation.AuthViewModel
 import com.hazrat.onedrop.auth.presentation.common.NetworkStatusBar
 import com.hazrat.onedrop.core.presentation.blood_donor_screen.BloodDonorViewModel
+import com.hazrat.onedrop.core.presentation.self_profile_screen.SelfProfileViewModel
 import com.hazrat.onedrop.navigation.AppNavigation
 import com.hazrat.onedrop.navigation.BottomNavigationBar
 import com.hazrat.onedrop.ui.theme.OneDropTheme
@@ -81,7 +82,7 @@ class MainActivity : ComponentActivity() {
                     val bottomPadding = it.calculateBottomPadding()
                     val authViewModel: AuthViewModel = hiltViewModel()
                     val bloodDonorViewModel: BloodDonorViewModel = hiltViewModel()
-                    val bloodDonorRegistered by bloodDonorViewModel.bloodDonorProfileState.collectAsState()
+                    val selfProfileViewModel : SelfProfileViewModel = hiltViewModel()
                     val authState = authViewModel.authState.observeAsState(initial = AuthState.Loading)
                     val profileState = authViewModel.profileState.collectAsState()
                     val authEvent = authViewModel::event
@@ -102,6 +103,7 @@ class MainActivity : ComponentActivity() {
                             authState = authState.value,
                             authEvent = authEvent,
                             bloodDonorViewModel = bloodDonorViewModel,
+                            selfProfileViewModel = selfProfileViewModel
                         )
                     }
                 }

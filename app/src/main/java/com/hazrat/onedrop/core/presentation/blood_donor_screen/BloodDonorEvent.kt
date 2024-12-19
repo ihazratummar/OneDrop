@@ -1,6 +1,7 @@
 package com.hazrat.onedrop.core.presentation.blood_donor_screen
 
 import com.hazrat.onedrop.core.domain.model.BloodGroup
+import com.hazrat.onedrop.core.domain.model.Gender
 import com.hazrat.onedrop.core.domain.model.State
 
 /**
@@ -12,8 +13,10 @@ sealed interface BloodDonorEvent {
 
     data class SetName(val name: String) : BloodDonorEvent
     data class SetBloodGroup(val bloodGroup: BloodGroup) : BloodDonorEvent
+    data class SetGender(val gender: Gender) : BloodDonorEvent
     data class SetAvailable(val available: Boolean) : BloodDonorEvent
     data class SetContactNumber(val contactNumber: String) : BloodDonorEvent
+    data class SetAge(val age: String) : BloodDonorEvent
     data class SetCity(val city: String) : BloodDonorEvent
     data object SetContactNumberPrivate : BloodDonorEvent
     data object SetNotificationEnabled : BloodDonorEvent
@@ -24,6 +27,8 @@ sealed interface BloodDonorEvent {
     data object CreateBloodDonorProfile : BloodDonorEvent
 
     data object OnBloodDropDownClick : BloodDonorEvent
+
+    data object OnGenderDropDownClick : BloodDonorEvent
 
     data object OnStateDropDownClick : BloodDonorEvent
 

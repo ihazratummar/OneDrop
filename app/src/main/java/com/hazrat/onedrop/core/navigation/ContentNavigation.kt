@@ -16,6 +16,7 @@ import com.hazrat.onedrop.auth.presentation.ProfileState
 import com.hazrat.onedrop.core.navigation.MainRoute.BloodDonorsProfileScreenRoute
 import com.hazrat.onedrop.core.navigation.MainRoute.CreateBloodDonorProfileRoute
 import com.hazrat.onedrop.core.navigation.MainRoute.CreateBloodRequestRoute
+import com.hazrat.onedrop.core.navigation.MainRoute.EditProfileScreenRoute
 import com.hazrat.onedrop.core.navigation.MainRoute.RequestBloodScreenRoute
 import com.hazrat.onedrop.core.presentation.blood_donor_profile_details_screen.BloodDonorProfileScreen
 import com.hazrat.onedrop.core.presentation.blood_donor_profile_details_screen.BloodDonorProfileViewModel
@@ -27,6 +28,9 @@ import com.hazrat.onedrop.core.presentation.home_screen.HomeScreen
 import com.hazrat.onedrop.core.presentation.more_screen.MoreScreen
 import com.hazrat.onedrop.core.presentation.request_blood_screen.BloodRequestScreen
 import com.hazrat.onedrop.core.presentation.request_blood_screen.RequestBloodScreen
+import com.hazrat.onedrop.core.presentation.self_profile_screen.EditProfileScreen
+import com.hazrat.onedrop.core.presentation.self_profile_screen.SelfProfileScreen
+import com.hazrat.onedrop.core.presentation.self_profile_screen.SelfProfileViewModel
 import com.hazrat.onedrop.navigation.MasterRoot.RootNav
 
 
@@ -41,6 +45,7 @@ fun NavGraphBuilder.contentNavigation(
     authEvent: (AuthEvent) -> Unit,
     navController: NavController,
     bloodDonorViewModel: BloodDonorViewModel,
+    selfProfileViewModel: SelfProfileViewModel
 ) {
     navigation<RootNav>(startDestination = MainRoute.HomeRoute) {
 
@@ -86,7 +91,8 @@ fun NavGraphBuilder.contentNavigation(
                 snackBarHostState = snackbarHostState,
                 onBloodDonorClick = {
                     navController.navigate(BloodDonorsProfileScreenRoute(it))
-                }
+                },
+                onGoToProfileClick = { navController.navigate(MainRoute.SelfProfileScreenRoute) }
             )
         }
         composable<CreateBloodDonorProfileRoute> {
@@ -125,6 +131,36 @@ fun NavGraphBuilder.contentNavigation(
                 bloodDonorModel = bloodDonorModel,
                 onBackClick = { navController.popBackStack() },
                 profileEvent = bloodDonorProfileViewModel::onEvent
+            )
+        }
+
+        composable<MainRoute.SelfProfileScreenRoute> {
+            val bloodDonorModel by selfProfileViewModel.bloodDonorModel.collectAsState()
+            val channelEvent by  selfProfileViewModel.events.collectAsState(initial = null)
+            LaunchedEffect(Unit) {
+                selfProfileViewModel.refresh()
+            }
+            SelfProfileScreen(
+                bloodDonorModel = bloodDonorModel,
+                onBackClick = { navController.popBackStack() },
+                onActionClick = { navController.navigate(EditProfileScreenRoute) },
+                channelEvent = channelEvent,
+                snackBarHostState = snackbarHostState
+            )
+        }
+
+        composable<EditProfileScreenRoute> {
+            val bloodDonorModel by selfProfileViewModel.bloodDonorModel.collectAsState()
+            val selfProfileState by selfProfileViewModel.selfProfileState.collectAsState()
+            EditProfileScreen(
+                bloodDonorModel = bloodDonorModel,
+                selfBloodDonorEvent = selfProfileViewModel::onEvent,
+                onBackClick = {
+                    selfProfileViewModel.refresh()
+                    navController.popBackStack()
+                },
+                isEnable = true,
+                selfProfileState = selfProfileState
             )
         }
     }

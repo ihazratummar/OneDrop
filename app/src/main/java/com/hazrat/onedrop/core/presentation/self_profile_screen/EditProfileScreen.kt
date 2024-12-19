@@ -1,13 +1,7 @@
-package com.hazrat.onedrop.core.presentation.blood_donor_screen
+package com.hazrat.onedrop.core.presentation.self_profile_screen
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,14 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,13 +23,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.toSize
 import com.hazrat.onedrop.R
 import com.hazrat.onedrop.auth.presentation.common.CustomTextField
@@ -50,56 +34,45 @@ import com.hazrat.onedrop.core.domain.model.BloodDonorModel
 import com.hazrat.onedrop.core.domain.model.BloodGroup
 import com.hazrat.onedrop.core.domain.model.Gender
 import com.hazrat.onedrop.core.domain.model.State
-import com.hazrat.onedrop.core.presentation.component.BasicAppBar
+import com.hazrat.onedrop.core.presentation.blood_donor_screen.BloodDonorEvent
+import com.hazrat.onedrop.core.presentation.blood_donor_screen.DropDownMenuCard
+import com.hazrat.onedrop.core.presentation.blood_donor_screen.GenericDropDownMenu
 import com.hazrat.onedrop.ui.theme.dimens
-
 
 /**
  * @author Hazrat Ummar Shaikh
- * Created on 07-12-2024
+ * Created on 10-12-2024
  */
 
 @Composable
-fun CreateBloodDonorScreen(
+fun EditProfileScreen(
     modifier: Modifier = Modifier,
     bloodDonorModel: BloodDonorModel,
-    onBackClick: () -> Unit,
-    bloodDonorEvent: (BloodDonorEvent) -> Unit,
-    bloodDonorProfileState: BloodDonorProfileState,
-    isEnable: Boolean
+    selfBloodDonorEvent: (SelfBloodDonorEvent) -> Unit,
+    onBackClick:() -> Unit,
+    isEnable: Boolean = false,
+    selfProfileState: SelfProfileState
 ) {
 
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
     ) {
-
         var bloodDropDownCardSize by remember { mutableStateOf(Size.Zero) }
         var stateDropDownCardSize by remember { mutableStateOf(Size.Zero) }
         var genderDropDownCardSize by remember { mutableStateOf(Size.Zero) }
-
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(dimens.size20)
+            modifier = Modifier.fillMaxSize().padding(horizontal = dimens.size20)
         ) {
-            Spacer(Modifier.height(dimens.size50))
-            BasicAppBar(
-                onBackClick = { onBackClick() },
-                title = "Register as Blood Donor",
-                action = {}
-            )
-            HorizontalDivider()
+            Spacer(Modifier.height(dimens.size150))
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
                 item {
-                    Spacer(Modifier.height(dimens.size150))
-                }
-                item {
                     CustomTextField(
                         textFieldTopLabel = "Your Name",
                         value = bloodDonorModel.name,
-                        onValueChange = { bloodDonorEvent(BloodDonorEvent.SetName(it)) },
+                        onValueChange = { selfBloodDonorEvent(SelfBloodDonorEvent.UpdateNameValue(it)) },
                         keyboardType = KeyboardType.Text,
                         keyBoardActions = KeyboardActions.Default,
                         label = "Name",
@@ -111,7 +84,7 @@ fun CreateBloodDonorScreen(
                     CustomTextField(
                         textFieldTopLabel = "Mobile Number",
                         value = bloodDonorModel.contactNumber,
-                        onValueChange = { bloodDonorEvent(BloodDonorEvent.SetContactNumber(it)) },
+                        onValueChange = { selfBloodDonorEvent(SelfBloodDonorEvent.UpdateNumberValue(it)) },
                         keyboardType = KeyboardType.Number,
                         keyBoardActions = KeyboardActions.Default,
                         label = "Number",
@@ -123,7 +96,7 @@ fun CreateBloodDonorScreen(
                     CustomTextField(
                         textFieldTopLabel = "Age",
                         value = bloodDonorModel.age.toString(),
-                        onValueChange = { bloodDonorEvent(BloodDonorEvent.SetAge(it)) },
+                        onValueChange = { selfBloodDonorEvent(SelfBloodDonorEvent.UpdateAgeValue(it)) },
                         keyboardType = KeyboardType.Number,
                         keyBoardActions = KeyboardActions.Default,
                         label = "Age",
@@ -139,7 +112,7 @@ fun CreateBloodDonorScreen(
                                 genderDropDownCardSize = coordinates.size.toSize()
                             },
                         text = if (bloodDonorModel.gender != null) bloodDonorModel.gender.toString() else "Select Gender",
-                        onDropDownClick = { bloodDonorEvent(BloodDonorEvent.OnGenderDropDownClick) },
+                        onDropDownClick = { selfBloodDonorEvent(SelfBloodDonorEvent.ToggleGenderDropDown) },
                         cardTopText = "Gender"
                     )
                     Spacer(Modifier.height(dimens.size10))
@@ -150,14 +123,14 @@ fun CreateBloodDonorScreen(
                                 bloodDropDownCardSize = coordinates.size.toSize()
                             },
                         text = if (bloodDonorModel.bloodGroup != null) bloodDonorModel.bloodGroup.toString() else "Select Blood",
-                        onDropDownClick = { bloodDonorEvent(BloodDonorEvent.OnBloodDropDownClick) },
+                        onDropDownClick = { selfBloodDonorEvent(SelfBloodDonorEvent.ToggleBloodGroupDropDown) },
                         cardTopText = "Blood Group"
                     )
                     Spacer(Modifier.height(dimens.size10))
                     CustomTextField(
                         textFieldTopLabel = "City",
                         value = bloodDonorModel.city,
-                        onValueChange = { bloodDonorEvent(BloodDonorEvent.SetCity(it)) },
+                        onValueChange = { selfBloodDonorEvent(SelfBloodDonorEvent.UpdateCityValue(it)) },
                         keyboardType = KeyboardType.Text,
                         keyBoardActions = KeyboardActions.Default,
                         label = "City",
@@ -169,7 +142,7 @@ fun CreateBloodDonorScreen(
                     CustomTextField(
                         textFieldTopLabel = "District",
                         value = bloodDonorModel.district,
-                        onValueChange = { bloodDonorEvent(BloodDonorEvent.SetDistrict(it)) },
+                        onValueChange = { selfBloodDonorEvent(SelfBloodDonorEvent.UpdateDistrictValue(it)) },
                         keyboardType = KeyboardType.Text,
                         keyBoardActions = KeyboardActions.Default,
                         label = "District",
@@ -185,14 +158,15 @@ fun CreateBloodDonorScreen(
                                 stateDropDownCardSize = coordinates.size.toSize()
                             },
                         text = if (bloodDonorModel.state != null) bloodDonorModel.state.toString() else "Select State",
-                        onDropDownClick = { bloodDonorEvent(BloodDonorEvent.OnStateDropDownClick) }
+                        onDropDownClick = { selfBloodDonorEvent(SelfBloodDonorEvent.ToggleStateDropDown) }
                     )
                     Spacer(Modifier.height(dimens.size20))
                     Button(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
                             onBackClick()
-                            bloodDonorEvent(BloodDonorEvent.CreateBloodDonorProfile)
+                            selfBloodDonorEvent(SelfBloodDonorEvent.UpdateBloodDonorProfile)
+                            selfBloodDonorEvent(SelfBloodDonorEvent.Refresh)
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
@@ -204,7 +178,7 @@ fun CreateBloodDonorScreen(
                         shape = RoundedCornerShape(dimens.size10)
                     ) {
                         Text(
-                            text = "Become Donor",
+                            text = "Update Profile",
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
@@ -214,10 +188,10 @@ fun CreateBloodDonorScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .width(with(LocalDensity.current) { genderDropDownCardSize.width.toDp() }),
-                        isDropdownOpen = bloodDonorProfileState.isGenderDropDownOpen,
-                        onDismiss = { bloodDonorEvent(BloodDonorEvent.OnGenderDropDownClick) },
+                        isDropdownOpen = selfProfileState.isGenderDropDownOpen,
+                        onDismiss = { selfBloodDonorEvent(SelfBloodDonorEvent.ToggleGenderDropDown) },
                         items = Gender.entries.toList(),
-                        onItemClick = { bloodDonorEvent(BloodDonorEvent.SetGender(it)) },
+                        onItemClick = { selfBloodDonorEvent(SelfBloodDonorEvent.UpdateGenderValue(it)) },
                         itemLabel = { it.toString() },
                     )
 
@@ -225,10 +199,10 @@ fun CreateBloodDonorScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .width(with(LocalDensity.current) { bloodDropDownCardSize.width.toDp() }),
-                        isDropdownOpen = bloodDonorProfileState.isBloodDropDownOpen,
-                        onDismiss = { bloodDonorEvent(BloodDonorEvent.OnBloodDropDownClick) },
+                        isDropdownOpen = selfProfileState.isBloodDropDownOpen,
+                        onDismiss = { selfBloodDonorEvent(SelfBloodDonorEvent.ToggleBloodGroupDropDown) },
                         items = BloodGroup.entries.toList(),
-                        onItemClick = { bloodDonorEvent(BloodDonorEvent.SetBloodGroup(it)) },
+                        onItemClick = { selfBloodDonorEvent(SelfBloodDonorEvent.UpdateBloodValue(it)) },
                         itemLabel = { it.toString() },
                     )
 
@@ -236,105 +210,29 @@ fun CreateBloodDonorScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .width(with(LocalDensity.current) { stateDropDownCardSize.width.toDp() }),
-                        isDropdownOpen = bloodDonorProfileState.isStateDropDownOpen,
-                        onDismiss = { bloodDonorEvent(BloodDonorEvent.OnStateDropDownClick) },
+                        isDropdownOpen = selfProfileState.isStateDropDownOpen,
+                        onDismiss = { selfBloodDonorEvent(SelfBloodDonorEvent.ToggleStateDropDown) },
                         items = State.entries.toList(),
-                        onItemClick = { bloodDonorEvent(BloodDonorEvent.SetState(it)) },
+                        onItemClick = { selfBloodDonorEvent(SelfBloodDonorEvent.UpdateStateValue(it)) },
                         itemLabel = { it.toString() }
                     )
                 }
             }
         }
+
+        ProfileTopBar(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(top = dimens.size50, start = dimens.size20, end = dimens.size20),
+            onBackClick = {onBackClick()},
+            onActionClick = {
+                onBackClick()
+                selfBloodDonorEvent(SelfBloodDonorEvent.UpdateBloodDonorProfile)
+                selfBloodDonorEvent(SelfBloodDonorEvent.Refresh)
+            },
+            actionIcon = painterResource(R.drawable.save)
+        )
     }
-}
 
 
-@OptIn(ExperimentalFoundationApi::class)
-@Preview
-@Composable
-fun DropDownMenuCard(
-    modifier: Modifier = Modifier,
-    text: String = "Blood Group",
-    cardTopText: String = "",
-    onDropDownClick: () -> Unit = {}
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth(),
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = cardTopText)
-            Spacer(Modifier.width(dimens.size20))
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .combinedClickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() },
-                        onClick = { onDropDownClick() }
-                    ),
-                border = BorderStroke(
-                    width = dimens.size1, color = MaterialTheme.colorScheme.secondaryContainer
-                ),
-                colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                shape = RoundedCornerShape(dimens.size10)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = dimens.size15, horizontal = dimens.size15),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(text = text)
-                    Icon(
-                        painter = painterResource(R.drawable.arrow_down),
-                        contentDescription = null
-                    )
-                }
-            }
-        }
-    }
-}
-
-
-@Composable
-fun <T> GenericDropDownMenu(
-    modifier: Modifier = Modifier,
-    isDropdownOpen: Boolean,
-    onDismiss: () -> Unit,
-    selectedItem: T? = null,
-    items: List<T>,
-    onItemClick: (T) -> Unit,
-    itemLabel: (T) -> String
-) {
-    DropdownMenu(
-        expanded = isDropdownOpen,
-        onDismissRequest = { onDismiss() },
-        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-        modifier = modifier.fillMaxWidth()
-    ) {
-        items.forEach { item ->
-            DropdownMenuItem(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                onClick = {
-                    onDismiss()
-                    onItemClick(item)
-                },
-                text = {
-                    Text(
-                        text = itemLabel(item),
-                        modifier = Modifier.fillMaxWidth(), // Ensures text takes full width
-                        textAlign = TextAlign.Center, // Centers the text within the available space
-                    )
-                },
-                colors = MenuDefaults.itemColors(
-                    textColor = if (item == selectedItem) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            )
-        }
-    }
 }

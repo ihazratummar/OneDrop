@@ -1,6 +1,7 @@
 package com.hazrat.onedrop.core.data.repository
 
 import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.hazrat.onedrop.core.domain.model.BloodDonorModel
 import com.hazrat.onedrop.core.domain.model.BloodGroup
@@ -10,6 +11,8 @@ import com.hazrat.onedrop.util.RootConstants.BLOOD_DONORS
 import com.hazrat.onedrop.util.results.BloodDonorProfileError
 import com.hazrat.onedrop.util.results.BloodDonorProfileSuccess
 import com.hazrat.onedrop.util.results.Result
+import com.hazrat.onedrop.util.results.SelfProfileError
+import com.hazrat.onedrop.util.results.SelfProfileSuccess
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
@@ -23,6 +26,7 @@ import javax.inject.Inject
  */
 
 class BloodDonorRepositoryImpl @Inject constructor(
+    private val firebaseAuth: FirebaseAuth,
     private val firestore: FirebaseFirestore
 ) : BloodDonorRepository {
 
@@ -54,7 +58,46 @@ class BloodDonorRepositoryImpl @Inject constructor(
         }
     }
 
-    //TODo: Solve Error Decrypting Data
+    override suspend fun updateBloodDonorProfile(bloodDonorModel: BloodDonorModel): Result<SelfProfileSuccess, SelfProfileError> {
+        return suspendCancellableCoroutine { continuation ->
+            try {
+                val data: MutableMap<String, Any?> = hashMapOf(
+                    "name" to bloodDonorModel.name,
+                    "age" to bloodDonorModel.age,
+                    "bloodGroup" to bloodDonorModel.bloodGroup?.name,
+                    "city" to bloodDonorModel.city,
+                    "contactNumber" to bloodDonorModel.contactNumber,
+                    "district" to bloodDonorModel.district,
+                    "state" to bloodDonorModel.state?.name,
+                    "gender" to bloodDonorModel.gender?.name,
+                    // Add other fields as necessary
+                )
+
+                firestore.collection(BLOOD_DONORS).document(bloodDonorModel.userId)
+                    .update(data)
+                    .addOnCompleteListener {
+                        if (it.isSuccessful) {
+                            continuation.resume(
+                                Result.Success(SelfProfileSuccess.UPDATED),
+                                null
+                            )
+                        }else{
+                            continuation.resume(
+                                Result.Error(SelfProfileError.UPDATE_FAILED),
+                                null
+                            )
+                        }
+                    }
+            } catch (_: Exception) {
+                continuation.resume(
+                    Result.Error(SelfProfileError.UPDATE_FAILED),
+                    null
+                )
+            }
+        }
+    }
+
+
     override suspend fun getListOfAllDonors(): Flow<List<BloodDonorModel>> = flow {
         try {
             val donorsList = mutableListOf<BloodDonorModel>()
@@ -146,5 +189,26 @@ class BloodDonorRepositoryImpl @Inject constructor(
             throw e
         }
     }
+
+    override suspend fun getSelfBloodDonorProfile(): Flow<BloodDonorModel> = flow {
+        val userId = firebaseAuth.currentUser?.uid ?: ""
+        if (userId.isEmpty()) {
+            Log.d("BloodDonorRepositoryImpl", "UserId is not valid")
+            return@flow
+        }
+        try {
+            val document = firestore.collection(BLOOD_DONORS).document(userId).get().await()
+            val donor = document.toObject(BloodDonorModel::class.java)
+            if (userId == donor?.userId) {
+                emit(donor)
+            } else {
+                throw Exception("No donor found with the provided userId.")
+            }
+        } catch (e: Exception) {
+            Log.d("BloodDonorRepositoryImpl", "Error getting the donor profile: ${e.message}")
+            throw e
+        }
+    }
+
 
 }

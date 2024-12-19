@@ -14,3 +14,10 @@ enum class BloodDonorProfileError: Error {
     FAILED,
     UNKNOWN
 }
+
+enum class SelfProfileSuccess{
+    UPDATED
+}
+enum class SelfProfileError : Error{
+    UPDATE_FAILED
+}

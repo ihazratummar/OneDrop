@@ -42,6 +42,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.toSize
 import com.hazrat.onedrop.R
 import com.hazrat.onedrop.core.domain.model.BloodDonorModel
@@ -52,6 +53,7 @@ import com.hazrat.onedrop.core.presentation.component.BloodDonorsCards
 import com.hazrat.onedrop.core.presentation.component.CardLoadingAnimation
 import com.hazrat.onedrop.core.presentation.component.RegisterAsDonorCard
 import com.hazrat.onedrop.ui.theme.dimens
+import com.hazrat.onedrop.util.event.ChannelEvent
 import kotlinx.coroutines.launch
 
 
@@ -70,9 +72,9 @@ fun BloodDonorScreen(
     onBackClick: () -> Unit,
     onRegisterClick: () -> Unit,
     onGoToProfileClick: () -> Unit = {},
-    bloodDonorChannelEvent: BloodDonorChannelEvent?,
+    bloodDonorChannelEvent: ChannelEvent?,
     snackBarHostState: SnackbarHostState,
-    onBloodDonorClick:(String) -> Unit
+    onBloodDonorClick: (String) -> Unit
 ) {
 
     val context = LocalContext.current
@@ -83,7 +85,7 @@ fun BloodDonorScreen(
     LaunchedEffect(bloodDonorChannelEvent) {
         bloodDonorChannelEvent?.let {
             when (it) {
-                is BloodDonorChannelEvent.Error -> {
+                is ChannelEvent.Error -> {
                     coroutineScope.launch {
                         snackBarHostState.showSnackbar(
                             message = it.error.asString(context),
@@ -93,7 +95,7 @@ fun BloodDonorScreen(
                     }
                 }
 
-                is BloodDonorChannelEvent.Success -> {
+                is ChannelEvent.Success -> {
                     coroutineScope.launch {
                         snackBarHostState.showSnackbar(
                             message = it.success.asString(context),
@@ -142,47 +144,54 @@ fun BloodDonorScreen(
                 }
                 items(donorList) {
                     if (donorList.isNotEmpty()) {
-                        if (!bloodDonorProfileState.isLoading){
-                            BloodDonorsCards(
-                                donorList = it,
-                                onClick = {
-                                    onBloodDonorClick(it.userId)
-                                }
-                            )
-                        }else{
+                        if (!bloodDonorProfileState.isLoading) {
+                            BloodDonorsCards(donorList = it, onClick = {
+                                onBloodDonorClick(it.userId)
+                            })
+                        } else {
                             CardLoadingAnimation()
                         }
                     }
                 }
             }
         }
-
-
+        if (donorList.isEmpty()){
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "No Donors Found",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        color = MaterialTheme.colorScheme.primary.copy(0.2f),
+                        fontWeight = FontWeight.Black,
+                    )
+                )
+            }
+        }
         Row(
-            modifier = Modifier
-                .align(Alignment.BottomCenter),
+            modifier = Modifier.align(Alignment.BottomCenter),
             horizontalArrangement = Arrangement.Center
         ) {
-            FilterDropDownMenu(
-                modifier = Modifier
+            FilterDropDownMenu(modifier = Modifier
 
-                    .onGloballyPositioned { coordinates ->
-                        bloodDropDownCardSize = coordinates.size.toSize()
-                    },
+                .onGloballyPositioned { coordinates ->
+                    bloodDropDownCardSize = coordinates.size.toSize()
+                },
                 onClick = { bloodDonorEvent(BloodDonorEvent.ToggleBloodGroupFilter) },
-                text = if (bloodDonorProfileState.selectedBloodGroup != null)
-                    bloodDonorProfileState.selectedBloodGroup.toString() else "Select Blood"
+                text = if (bloodDonorProfileState.selectedBloodGroup != null) bloodDonorProfileState.selectedBloodGroup.toString() else "Select Blood"
             )
-            FilterDropDownMenu(
-                modifier = Modifier
-                    .onGloballyPositioned { coordinates ->
-                        stateDownCardSize = coordinates.size.toSize()
-                    },
+            FilterDropDownMenu(modifier = Modifier.onGloballyPositioned { coordinates ->
+                stateDownCardSize = coordinates.size.toSize()
+            },
                 onClick = { bloodDonorEvent(BloodDonorEvent.ToggleStateFilter) },
-                text = if (bloodDonorProfileState.selectedState != null)
-                    bloodDonorProfileState.selectedState.toString() else "Select State"
+                text = if (bloodDonorProfileState.selectedState != null) bloodDonorProfileState.selectedState.toString() else "Select State"
             )
         }
+
+
+
 
         GenericDropDownMenu(
             modifier = Modifier
@@ -192,7 +201,8 @@ fun BloodDonorScreen(
             onDismiss = { bloodDonorEvent(BloodDonorEvent.ToggleBloodGroupFilter) },
             items = BloodGroup.entries.toList(),
             onItemClick = { bloodDonorEvent(BloodDonorEvent.SetBloodGroupFilter(it)) },
-            itemLabel = { it.toString() }
+            itemLabel = { it.toString() },
+            selectedItem = bloodDonorProfileState.selectedBloodGroup
         )
 
         GenericDropDownMenu(
@@ -203,7 +213,8 @@ fun BloodDonorScreen(
             onDismiss = { bloodDonorEvent(BloodDonorEvent.ToggleStateFilter) },
             items = State.entries.toList(),
             onItemClick = { bloodDonorEvent(BloodDonorEvent.SetStateFilter(it)) },
-            itemLabel = { it.toString() }
+            itemLabel = { it.toString() },
+            selectedItem = bloodDonorProfileState.selectedState
         )
 
     }
@@ -212,35 +223,28 @@ fun BloodDonorScreen(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FilterDropDownMenu(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-    text: String = "Filter"
+    modifier: Modifier = Modifier, onClick: () -> Unit, text: String = "Filter"
 
 ) {
-    Card(
-        modifier = modifier
-            .navigationBarsPadding()
-            .padding(dimens.size30)
-            .combinedClickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() },
-                onClick = {
-                    onClick()
-                }
-            ),
+    Card(modifier = modifier
+        .navigationBarsPadding()
+        .padding(dimens.size30)
+        .combinedClickable(indication = null,
+            interactionSource = remember { MutableInteractionSource() },
+            onClick = {
+                onClick()
+            }),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         border = BorderStroke(
             width = dimens.size1, color = MaterialTheme.colorScheme.primary
         ),
-        shape = RoundedCornerShape(dimens.size10)
-    ) {
+        shape = RoundedCornerShape(dimens.size10)) {
         Row(
             modifier = Modifier.padding(horizontal = dimens.size10),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = text,
-                modifier = Modifier.padding(vertical = dimens.size10)
+                text = text, modifier = Modifier.padding(vertical = dimens.size10)
             )
             Icon(
                 painter = painterResource(R.drawable.arrowup), contentDescription = null

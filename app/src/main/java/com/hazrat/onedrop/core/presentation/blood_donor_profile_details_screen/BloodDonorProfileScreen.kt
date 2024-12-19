@@ -1,5 +1,6 @@
 package com.hazrat.onedrop.core.presentation.blood_donor_profile_details_screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -23,6 +25,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import com.hazrat.onedrop.core.domain.model.BloodDonorModel
@@ -47,6 +51,16 @@ fun BloodDonorProfileScreen(
 
     val aboutList = listOf(
         AboutRowData(
+            painter = painterResource(R.drawable.age),
+            text = bloodDonorModel?.age ?: "Unknown",
+            labelText = "Age"
+        ),
+        AboutRowData(
+            painter = painterResource(R.drawable.gender),
+            text = bloodDonorModel?.gender.toString(),
+            labelText = "Gender"
+        ),
+        AboutRowData(
             painter = painterResource(R.drawable.city),
             text = bloodDonorModel?.city ?: "Unknown",
             labelText = "City"
@@ -54,7 +68,7 @@ fun BloodDonorProfileScreen(
         AboutRowData(
             painter = painterResource(R.drawable.map),
             text = bloodDonorModel?.district ?: "Unknown",
-            labelText = "Distric"
+            labelText = "District"
         ),
         AboutRowData(
             painter = painterResource(R.drawable.globe),
@@ -63,7 +77,7 @@ fun BloodDonorProfileScreen(
         ),
         AboutRowData(
             painter = painterResource(R.drawable.phone),
-            text = bloodDonorModel?.contactNumber ?: "Unknown",
+            text = bloodDonorModel?.isContactNumberPrivate?.let { if (!it) bloodDonorModel.contactNumber else "Number Private" },
             labelText = "Mobile Number"
         )
     )
@@ -171,7 +185,8 @@ fun AboutRow(
     modifier: Modifier = Modifier,
     painter: Painter,
     text: String?,
-    labelText: String
+    labelText: String,
+    isCustomColor: Boolean = false
 ) {
     Row(
         modifier = modifier
@@ -179,10 +194,28 @@ fun AboutRow(
             .padding(horizontal = dimens.size8, vertical = dimens.size15),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            painter = painter,
-            contentDescription = null
-        )
+        Box(
+            modifier = Modifier
+                .background(
+                    brush = Brush.linearGradient(
+                        listOf(
+                            MaterialTheme.colorScheme.secondary,
+                            MaterialTheme.colorScheme.secondaryContainer
+                        )
+                    ),
+                    shape = CircleShape
+                )
+                .size(dimens.size40),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painter,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(dimens.size20),
+                tint = if (isCustomColor) Color.Unspecified else MaterialTheme.colorScheme.onPrimary
+            )
+        }
         Spacer(Modifier.width(dimens.size10))
         Text(
             text = labelText,
@@ -230,7 +263,8 @@ fun AboutRowShimmerEffect(modifier: Modifier = Modifier) {
 data class AboutRowData(
     val painter: Painter,
     val text: String?,
-    val labelText: String
+    val labelText: String,
+    val isCustomColor: Boolean = false
 )
 
 @Composable

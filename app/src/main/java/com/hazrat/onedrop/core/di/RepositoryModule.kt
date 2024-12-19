@@ -1,5 +1,6 @@
 package com.hazrat.onedrop.core.di
 
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.hazrat.onedrop.core.data.repository.BloodDonorRepositoryImpl
 import com.hazrat.onedrop.core.domain.repository.BloodDonorRepository
@@ -20,8 +21,10 @@ object RepositoryModule {
     @Provides
     fun provideBloodDonorRepository(
         firestore: FirebaseFirestore,
+        firebaseAuth: FirebaseAuth,
     ): BloodDonorRepository = BloodDonorRepositoryImpl(
-        firestore = firestore
+        firestore = firestore,
+        firebaseAuth = firebaseAuth
     )
 
 }

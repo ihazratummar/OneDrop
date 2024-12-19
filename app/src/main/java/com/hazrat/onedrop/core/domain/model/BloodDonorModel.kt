@@ -7,6 +7,8 @@ import kotlinx.serialization.Serializable
 data class BloodDonorModel(
     var userId: String = "",  // Default value
     val name: String = "",  // Default value
+    val age: String = "",  // Default value
+    val gender: Gender? = null,  // Assuming default gender
     val bloodGroup: BloodGroup? = null,  // Assuming default blood group
     val city: String = "",  // Default value
     val district: String = "",  // Default value
@@ -22,4 +24,18 @@ data class BloodDonorModel(
 enum class Location {
     DISTRICT,
     STATE
+}
+
+@Serializable
+enum class Gender{
+    MALE{
+        override fun toString(): String {
+            return "Male"
+        }
+    },
+    FEMALE{
+        override fun toString(): String {
+            return "Female"
+        }
+    },
 }

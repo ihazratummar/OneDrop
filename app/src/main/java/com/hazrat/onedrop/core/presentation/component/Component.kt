@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -29,7 +28,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -41,7 +39,6 @@ import com.hazrat.onedrop.R
 import com.hazrat.onedrop.auth.presentation.ProfileState
 import com.hazrat.onedrop.auth.presentation.common.buttonShimmerEffect
 import com.hazrat.onedrop.core.domain.model.BloodDonorModel
-import com.hazrat.onedrop.core.domain.model.BloodGroup
 import com.hazrat.onedrop.core.navigation.MainRoute
 import com.hazrat.onedrop.ui.theme.dimens
 
@@ -365,7 +362,7 @@ fun BloodDonorsCards(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable{
+            .clickable {
                 onClick()
             }
             .height(dimens.size150)
@@ -383,17 +380,7 @@ fun BloodDonorsCards(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = when (donorList.bloodGroup) {
-                    BloodGroup.A_POSITIVE -> painterResource(R.drawable.a_plus)
-                    BloodGroup.A_NEGATIVE -> painterResource(R.drawable.a_minus)
-                    BloodGroup.B_POSITIVE -> painterResource(R.drawable.b_plus)
-                    BloodGroup.B_NEGATIVE -> painterResource(R.drawable.b_minus)
-                    BloodGroup.AB_POSITIVE -> painterResource(R.drawable.ab_plus)
-                    BloodGroup.AB_NEGATIVE -> painterResource(R.drawable.ab_minus)
-                    BloodGroup.O_POSITIVE -> painterResource(R.drawable.o_plus)
-                    BloodGroup.O_NEGATIVE -> painterResource(R.drawable.o_minus)
-                    null -> painterResource(R.drawable.onedrop_logo)
-                },
+                painter = painterResource(donorList.bloodGroup?.getIconResId()?: R.drawable.onedrop_logo),
                 contentDescription = null,
                 modifier = Modifier
                     .size(dimens.size60),
@@ -408,7 +395,8 @@ fun BloodDonorsCards(
             ) {
                 Text(
                     donorList.name,
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.SemiBold
                 )
                 if (!isContactPrivate) {
                     Text(
