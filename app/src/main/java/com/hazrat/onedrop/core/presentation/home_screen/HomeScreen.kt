@@ -25,6 +25,7 @@ fun HomeScreen(
     onActivityClick: (ActivityAs) -> Unit,
     profileState: ProfileState,
     bloodDonorList: List<BloodDonorModel>,
+    homeState: HomeState
 ) {
 
 
@@ -36,9 +37,10 @@ fun HomeScreen(
         ) {
             item {
                 HomePageHeaderCard(
-                    profileState = profileState
+                    profileState = profileState,
+                    isAvailable = homeState.isDonorAvailable,
+                    isRegistered = homeState.isDonorProfileExists
                 )
-
             }
             item {
                 Spacer(Modifier.height(dimens.size50))

@@ -32,7 +32,7 @@ interface BloodDonorRepository {
 
     suspend fun getBloodDonorProfile(userId: String): Flow<BloodDonorModel>
 
-    suspend fun getSelfBloodDonorProfile(): Flow<BloodDonorModel>
+    suspend fun getSelfBloodDonorProfile(): Flow<BloodDonorModel?>
 
 
 }

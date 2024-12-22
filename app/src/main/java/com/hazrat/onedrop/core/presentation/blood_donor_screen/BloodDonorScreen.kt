@@ -52,6 +52,7 @@ import com.hazrat.onedrop.core.presentation.component.BasicAppBar
 import com.hazrat.onedrop.core.presentation.component.BloodDonorsCards
 import com.hazrat.onedrop.core.presentation.component.CardLoadingAnimation
 import com.hazrat.onedrop.core.presentation.component.RegisterAsDonorCard
+import com.hazrat.onedrop.core.presentation.register_blood_donor.GenericDropDownMenu
 import com.hazrat.onedrop.ui.theme.dimens
 import com.hazrat.onedrop.util.event.ChannelEvent
 import kotlinx.coroutines.launch
@@ -68,13 +69,14 @@ fun BloodDonorScreen(
     modifier: Modifier = Modifier,
     bloodDonorEvent: (BloodDonorEvent) -> Unit,
     donorList: List<BloodDonorModel>,
-    bloodDonorProfileState: BloodDonorProfileState,
+    bloodDonorProfileState: BloodDonorScreenState,
     onBackClick: () -> Unit,
     onRegisterClick: () -> Unit,
     onGoToProfileClick: () -> Unit = {},
     bloodDonorChannelEvent: ChannelEvent?,
     snackBarHostState: SnackbarHostState,
-    onBloodDonorClick: (String) -> Unit
+    onBloodDonorClick: (String) -> Unit,
+    bloodDonorMode: BloodDonorModel
 ) {
 
     val context = LocalContext.current
@@ -145,9 +147,13 @@ fun BloodDonorScreen(
                 items(donorList) {
                     if (donorList.isNotEmpty()) {
                         if (!bloodDonorProfileState.isLoading) {
-                            BloodDonorsCards(donorList = it, onClick = {
-                                onBloodDonorClick(it.userId)
-                            })
+                            BloodDonorsCards(
+                                donorList = it,
+                                onClick = {
+                                    onBloodDonorClick(it.userId)
+                                },
+                                isContactPrivate = bloodDonorMode.isContactNumberPrivate
+                            )
                         } else {
                             CardLoadingAnimation()
                         }
@@ -155,7 +161,7 @@ fun BloodDonorScreen(
                 }
             }
         }
-        if (donorList.isEmpty()){
+        if (donorList.isEmpty()) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
@@ -174,23 +180,23 @@ fun BloodDonorScreen(
             modifier = Modifier.align(Alignment.BottomCenter),
             horizontalArrangement = Arrangement.Center
         ) {
-            FilterDropDownMenu(modifier = Modifier
+            FilterDropDownMenu(
+                modifier = Modifier
 
-                .onGloballyPositioned { coordinates ->
-                    bloodDropDownCardSize = coordinates.size.toSize()
-                },
+                    .onGloballyPositioned { coordinates ->
+                        bloodDropDownCardSize = coordinates.size.toSize()
+                    },
                 onClick = { bloodDonorEvent(BloodDonorEvent.ToggleBloodGroupFilter) },
                 text = if (bloodDonorProfileState.selectedBloodGroup != null) bloodDonorProfileState.selectedBloodGroup.toString() else "Select Blood"
             )
-            FilterDropDownMenu(modifier = Modifier.onGloballyPositioned { coordinates ->
-                stateDownCardSize = coordinates.size.toSize()
-            },
+            FilterDropDownMenu(
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    stateDownCardSize = coordinates.size.toSize()
+                },
                 onClick = { bloodDonorEvent(BloodDonorEvent.ToggleStateFilter) },
                 text = if (bloodDonorProfileState.selectedState != null) bloodDonorProfileState.selectedState.toString() else "Select State"
             )
         }
-
-
 
 
         GenericDropDownMenu(
@@ -226,19 +232,21 @@ fun FilterDropDownMenu(
     modifier: Modifier = Modifier, onClick: () -> Unit, text: String = "Filter"
 
 ) {
-    Card(modifier = modifier
-        .navigationBarsPadding()
-        .padding(dimens.size30)
-        .combinedClickable(indication = null,
-            interactionSource = remember { MutableInteractionSource() },
-            onClick = {
-                onClick()
-            }),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+    Card(
+        modifier = modifier
+            .navigationBarsPadding()
+            .padding(dimens.size30)
+            .combinedClickable(indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = {
+                    onClick()
+                }),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
         border = BorderStroke(
             width = dimens.size1, color = MaterialTheme.colorScheme.primary
         ),
-        shape = RoundedCornerShape(dimens.size10)) {
+        shape = RoundedCornerShape(dimens.size10)
+    ) {
         Row(
             modifier = Modifier.padding(horizontal = dimens.size10),
             verticalAlignment = Alignment.CenterVertically

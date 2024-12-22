@@ -9,7 +9,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.hazrat.onedrop.auth.data.repository.AuthRepositoryImpl
 import com.hazrat.onedrop.auth.domain.repository.AuthRepository
 import com.hazrat.onedrop.core.domain.repository.BloodDonorRepository
-import com.hazrat.onedrop.util.datastore.DataStorePreference
+import com.hazrat.onedrop.util.datastore.AppDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
@@ -24,9 +24,9 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val dataStorePreference: DataStorePreference,
     private val bloodDonorRepository: BloodDonorRepository,
-    private val firebaseAuth: FirebaseAuth
+    private val firebaseAuth: FirebaseAuth,
+    private val appDataStore: AppDataStore
 ) : ViewModel() {
 
 
@@ -50,7 +50,7 @@ class AuthViewModel @Inject constructor(
                 viewModelScope.launch{
                     delay(2000)
                     bloodDonorRepository.isBloodDonorProfileExists(userId).collect{state ->
-                        dataStorePreference.setBloodDonorRegistered(state)
+                        appDataStore.setBloodDonorRegistered(state)
                         Log.d("bloodDonorState", "refreshProfileState: $state")
                     }
                 }
@@ -59,7 +59,7 @@ class AuthViewModel @Inject constructor(
             AuthEvent.SignOut -> {
                 viewModelScope.launch {
                     authRepository.signOut()
-                    dataStorePreference.setBloodDonorRegistered(false)
+                    appDataStore.setBloodDonorRegistered(false)
                 }
             }
         }

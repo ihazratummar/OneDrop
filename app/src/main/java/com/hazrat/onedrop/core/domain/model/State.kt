@@ -89,5 +89,6 @@ enum class State {
     },
     WEST_BENGAL {
         override fun toString() = "West Bengal"
-    };
+    },
+
 }

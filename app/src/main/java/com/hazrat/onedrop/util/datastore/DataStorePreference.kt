@@ -1,10 +1,9 @@
 package com.hazrat.onedrop.util.datastore
 
 import android.content.Context
-import com.hazrat.onedrop.util.datastore.DatastoreConstant.DONOR_REGISTERED_KEY
 import com.hazrat.onedrop.util.datastore.DatastoreConstant.NETWORK_PREF
-import com.hazrat.onedrop.util.datastore.DatastoreConstant.PREF_NAME
 import com.hazrat.onedrop.util.datastore.DatastoreConstant.NETWORK_STATUS_KEY
+import com.hazrat.onedrop.util.datastore.DatastoreConstant.PREF_NAME
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -16,8 +15,6 @@ import javax.inject.Inject
 class DataStorePreference @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-
-
     fun setNetworkBoolean(isSplashScreen: Boolean) {
         val pref = context.getSharedPreferences(NETWORK_PREF, Context.MODE_PRIVATE)
         pref.edit().putBoolean(NETWORK_STATUS_KEY, isSplashScreen).apply()
@@ -26,21 +23,6 @@ class DataStorePreference @Inject constructor(
     fun getNetworkBoolean(): Boolean {
         val pref = context.getSharedPreferences(NETWORK_PREF, Context.MODE_PRIVATE)
         return pref.getBoolean(NETWORK_STATUS_KEY, false)
-    }
-
-    fun setBloodDonorRegistered(isRegistered: Boolean) {
-        val pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        pref.edit().putBoolean(DONOR_REGISTERED_KEY, isRegistered).apply()
-    }
-
-    fun getBloodDonorRegistered(): Boolean {
-        val pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        return pref.getBoolean(DONOR_REGISTERED_KEY, false)
-    }
-
-    suspend fun clearBloodDonorRegistered() {
-        val pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        pref.edit().remove(DONOR_REGISTERED_KEY).apply()
     }
 
     fun clearAllData() {

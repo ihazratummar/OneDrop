@@ -190,7 +190,7 @@ class BloodDonorRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getSelfBloodDonorProfile(): Flow<BloodDonorModel> = flow {
+    override suspend fun getSelfBloodDonorProfile(): Flow<BloodDonorModel?> = flow {
         val userId = firebaseAuth.currentUser?.uid ?: ""
         if (userId.isEmpty()) {
             Log.d("BloodDonorRepositoryImpl", "UserId is not valid")
@@ -202,11 +202,11 @@ class BloodDonorRepositoryImpl @Inject constructor(
             if (userId == donor?.userId) {
                 emit(donor)
             } else {
-                throw Exception("No donor found with the provided userId.")
+                BloodDonorModel()
             }
         } catch (e: Exception) {
+            BloodDonorModel()
             Log.d("BloodDonorRepositoryImpl", "Error getting the donor profile: ${e.message}")
-            throw e
         }
     }
 

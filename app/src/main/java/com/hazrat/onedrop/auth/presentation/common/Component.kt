@@ -175,7 +175,7 @@ fun AuthenticationButton(
 
     Button(
         modifier = modifier.fillMaxWidth().let {
-            if (isLoadings) it.buttonShimmerEffect() else it
+            if (isLoadings) it.shimmerEffect() else it
         },
         onClick = {
             onButtonClick()
@@ -262,8 +262,8 @@ fun BottomText(
 }
 
 
-fun Modifier.buttonShimmerEffect(
-    isRounded: Boolean = false
+fun Modifier.shimmerEffect(
+    isRounded: Boolean = false,
 ): Modifier = composed {
     var size by remember {
         mutableStateOf(IntSize.Zero)

@@ -87,6 +87,8 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
 
+    implementation (libs.gson)
+
     //Compose Navigation
     implementation(libs.androidx.navigation.compose)
 
@@ -120,6 +122,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.messaging)
+    implementation(libs.firebase.realtime.database)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage)
     implementation(libs.firebase.auth)

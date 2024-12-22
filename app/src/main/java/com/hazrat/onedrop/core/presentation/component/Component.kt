@@ -37,7 +37,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.hazrat.onedrop.R
 import com.hazrat.onedrop.auth.presentation.ProfileState
-import com.hazrat.onedrop.auth.presentation.common.buttonShimmerEffect
+import com.hazrat.onedrop.auth.presentation.common.shimmerEffect
 import com.hazrat.onedrop.core.domain.model.BloodDonorModel
 import com.hazrat.onedrop.core.navigation.MainRoute
 import com.hazrat.onedrop.ui.theme.dimens
@@ -50,7 +50,9 @@ import com.hazrat.onedrop.ui.theme.dimens
 @Composable
 fun HomePageHeaderCard(
     modifier: Modifier = Modifier,
-    profileState: ProfileState
+    profileState: ProfileState,
+    isAvailable: Boolean,
+    isRegistered: Boolean = false
 ) {
     Box(
         modifier = modifier
@@ -69,7 +71,9 @@ fun HomePageHeaderCard(
             Box(modifier = Modifier.fillMaxSize()) {
                 ProfileAndIcons(
                     modifier = Modifier.align(Alignment.Center),
-                    profileState = profileState
+                    profileState = profileState,
+                    isAvailable = isAvailable,
+                    isRegistered = isRegistered
                 )
             }
         }
@@ -106,7 +110,9 @@ fun HomePageHeaderCard(
 @Composable
 fun ProfileAndIcons(
     modifier: Modifier = Modifier,
-    profileState: ProfileState
+    profileState: ProfileState,
+    isAvailable: Boolean = true,
+    isRegistered: Boolean
 ) {
     Row(
         modifier = modifier
@@ -120,21 +126,24 @@ fun ProfileAndIcons(
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(style = SpanStyle()) {
-                        append("Donate Blood: ")
+            if (isRegistered){
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(style = SpanStyle()) {
+                            append("Donate Blood: ")
+                        }
+                        withStyle(
+                            style = SpanStyle(
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            append(if (!isAvailable) "Off" else "On")
+                        }
+
                     }
-                    withStyle(
-                        style = SpanStyle(
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        append("Off")
-                    }
-                }
-            )
+                )
+            }
         }
         Spacer(Modifier.weight(1f))
         Icon(painter = painterResource(R.drawable.notificationonn), null)
@@ -380,7 +389,9 @@ fun BloodDonorsCards(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(donorList.bloodGroup?.getIconResId()?: R.drawable.onedrop_logo),
+                painter = painterResource(
+                    donorList.bloodGroup?.getIconResId() ?: R.drawable.onedrop_logo
+                ),
                 contentDescription = null,
                 modifier = Modifier
                     .size(dimens.size60),
@@ -398,12 +409,13 @@ fun BloodDonorsCards(
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold
                 )
-                if (!isContactPrivate) {
-                    Text(
-                        donorList.contactNumber,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
+                Text(
+                    text = if (!isContactPrivate) donorList.contactNumber else donorList.contactNumber.take(
+                        5
+                    ) + "XXXXX",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+
                 if (!isAddressPrivate) {
                     Text(
                         "${donorList.city} , ${donorList.district} , ${donorList.state}",
@@ -483,7 +495,7 @@ fun CardLoadingAnimation() {
         ) {
             Box(
                 modifier = Modifier
-                    .buttonShimmerEffect(isRounded = true)
+                    .shimmerEffect(isRounded = true)
                     .size(dimens.size60)
             )
 
@@ -500,21 +512,21 @@ fun CardLoadingAnimation() {
                         .padding(vertical = dimens.size10)
                         .fillMaxWidth(fraction = 0.8f)
                         .height(dimens.size20)
-                        .buttonShimmerEffect()
+                        .shimmerEffect()
                 )
                 Box(
                     modifier = Modifier
                         .padding(vertical = dimens.size10)
                         .fillMaxWidth(fraction = 0.5f)
                         .height(dimens.size15)
-                        .buttonShimmerEffect()
+                        .shimmerEffect()
                 )
                 Box(
                     modifier = Modifier
                         .padding(vertical = dimens.size10)
                         .fillMaxWidth()
                         .height(dimens.size10)
-                        .buttonShimmerEffect()
+                        .shimmerEffect()
                 )
 
             }

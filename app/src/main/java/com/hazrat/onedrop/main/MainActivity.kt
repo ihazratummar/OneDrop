@@ -14,9 +14,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -49,10 +47,13 @@ class MainActivity : ComponentActivity() {
         // Hide the action bar
         actionBar?.hide()
         setContent {
-            OneDropTheme {
+            val viewModel: MainViewModel = hiltViewModel()
+            val isDarkThemeEnabled  = viewModel.isDarkThemeEnabled.collectAsStateWithLifecycle()
+            OneDropTheme (
+                darkTheme = isDarkThemeEnabled.value
+            ){
                 val navController = rememberNavController()
                 val snackBarHostState = remember { SnackbarHostState() }
-                val viewModel: MainViewModel = hiltViewModel()
                 val isConnected = viewModel.isConnected.collectAsStateWithLifecycle()
                 Scaffold(
                     snackbarHost = {
@@ -82,7 +83,7 @@ class MainActivity : ComponentActivity() {
                     val bottomPadding = it.calculateBottomPadding()
                     val authViewModel: AuthViewModel = hiltViewModel()
                     val bloodDonorViewModel: BloodDonorViewModel = hiltViewModel()
-                    val selfProfileViewModel : SelfProfileViewModel = hiltViewModel()
+                    val selfProfileViewModel: SelfProfileViewModel = hiltViewModel()
                     val authState = authViewModel.authState.observeAsState(initial = AuthState.Loading)
                     val profileState = authViewModel.profileState.collectAsState()
                     val authEvent = authViewModel::event
@@ -102,8 +103,7 @@ class MainActivity : ComponentActivity() {
                             snackbarHostState = snackBarHostState,
                             authState = authState.value,
                             authEvent = authEvent,
-                            bloodDonorViewModel = bloodDonorViewModel,
-                            selfProfileViewModel = selfProfileViewModel
+                            bloodDonorViewModel = bloodDonorViewModel
                         )
                     }
                 }

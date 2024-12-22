@@ -1,15 +1,14 @@
 package com.hazrat.onedrop.core.presentation.self_profile_screen
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -34,9 +33,11 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import com.hazrat.onedrop.R
+import com.hazrat.onedrop.auth.presentation.common.shimmerEffect
 import com.hazrat.onedrop.core.domain.model.BloodDonorModel
 import com.hazrat.onedrop.core.presentation.blood_donor_profile_details_screen.AboutRow
 import com.hazrat.onedrop.core.presentation.blood_donor_profile_details_screen.AboutRowData
+import com.hazrat.onedrop.core.presentation.more_screen.settings.CustomSwitcher
 import com.hazrat.onedrop.ui.theme.dimens
 
 /**
@@ -76,7 +77,7 @@ fun ProfileDetails(
         AboutRowData(
             painter = painterResource(R.drawable.map),
             text = bloodDonorModel.district,
-            labelText = "Distric"
+            labelText = "District"
         ),
         AboutRowData(
             painter = painterResource(R.drawable.globe),
@@ -196,16 +197,18 @@ fun ProfileTopBar(
 @Composable
 fun TopBarCard(
     modifier: Modifier = Modifier,
-    name: String = "Hazrat Ummar Shaikh"
+    name: String,
+    isChecked : Boolean,
+    onAvailableToggleSwitchClick: () -> Unit
 ) {
     Card(
         modifier = modifier
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        MaterialTheme.colorScheme.primary, // primary color
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), // lighter shade
-                        MaterialTheme.colorScheme.background // darker shade
+                        MaterialTheme.colorScheme.primary.copy(0.3f),
+                        MaterialTheme.colorScheme.primaryContainer.copy(0.2f),
+                        MaterialTheme.colorScheme.background
                     ),
                     startY = 0f,
                     endY = Float.POSITIVE_INFINITY // The gradient will extend vertically
@@ -214,7 +217,6 @@ fun TopBarCard(
             .fillMaxWidth()
             .height(dimens.size250),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        border = BorderStroke(width = dimens.size1, color = MaterialTheme.colorScheme.primary)
     ) {
         Column(
             modifier = Modifier
@@ -223,17 +225,18 @@ fun TopBarCard(
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(
-                painter = painterResource(R.drawable.age),
-                contentDescription = null,
-                modifier = Modifier.size(dimens.size100)
-            )
             Text(
                 text = name.uppercase(),
                 style = MaterialTheme.typography.headlineMedium.copy(
                     fontWeight = FontWeight.Black,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                 ),
+            )
+            CustomSwitcher(
+                isChecked = !isChecked,
+                offIcon = painterResource(R.drawable.halfbloodlogo),
+                onIcon = painterResource(R.drawable.onedrop_logo),
+                onClick = {onAvailableToggleSwitchClick()}
             )
         }
     }

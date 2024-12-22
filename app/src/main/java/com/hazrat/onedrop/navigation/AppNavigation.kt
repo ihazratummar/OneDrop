@@ -30,7 +30,6 @@ import com.hazrat.onedrop.core.navigation.BottomNavigation
 import com.hazrat.onedrop.core.navigation.contentNavigation
 import com.hazrat.onedrop.core.presentation.blood_donor_screen.BloodDonorEvent
 import com.hazrat.onedrop.core.presentation.blood_donor_screen.BloodDonorViewModel
-import com.hazrat.onedrop.core.presentation.self_profile_screen.SelfProfileViewModel
 import kotlinx.serialization.Serializable
 
 @Composable
@@ -41,8 +40,7 @@ fun AppNavigation(
     snackbarHostState: SnackbarHostState,
     authState: AuthState,
     authEvent: (AuthEvent) -> Unit,
-    bloodDonorViewModel: BloodDonorViewModel,
-    selfProfileViewModel : SelfProfileViewModel
+    bloodDonorViewModel: BloodDonorViewModel
 ) {
 
 
@@ -59,7 +57,6 @@ fun AppNavigation(
                 authEvent = authEvent,
                 navController = navHostController,
                 bloodDonorViewModel = bloodDonorViewModel,
-                selfProfileViewModel = selfProfileViewModel
             )
         } else {
             authNavigation(

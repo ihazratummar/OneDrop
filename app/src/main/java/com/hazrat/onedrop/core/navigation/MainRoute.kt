@@ -43,7 +43,7 @@ sealed class MainRoute {
     data object SelfProfileScreenRoute : MainRoute()
 
     @Serializable
-    data object EditProfileScreenRoute : MainRoute()
+    data object SettingScreenRoute : MainRoute()
 
 }
 

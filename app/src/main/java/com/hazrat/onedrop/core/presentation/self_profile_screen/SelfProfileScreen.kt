@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -34,7 +35,8 @@ fun SelfProfileScreen(
     onBackClick: () -> Unit,
     onActionClick: () -> Unit,
     channelEvent: ChannelEvent?,
-    snackBarHostState: SnackbarHostState
+    snackBarHostState: SnackbarHostState,
+    onEvent: (SelfBloodDonorEvent) -> Unit
 ) {
 
     val context = LocalContext.current
@@ -45,7 +47,7 @@ fun SelfProfileScreen(
             when (it) {
                 is ChannelEvent.Error -> {
                     coroutineScope.launch {
-                        Log.d("SelfProfileScreen", "Error event received: ${it.error}")
+                        Log.d("SelfProfileScreen", "Error onEvent received: ${it.error}")
                         snackBarHostState.showSnackbar(
                             message = it.error.asString(context),
                             duration = SnackbarDuration.Long,
@@ -56,7 +58,7 @@ fun SelfProfileScreen(
 
                 is ChannelEvent.Success -> {
                     coroutineScope.launch {
-                        Log.d("SelfProfileScreen", "Error event received: ${it.success}")
+                        Log.d("SelfProfileScreen", "Error onEvent received: ${it.success}")
                         snackBarHostState.showSnackbar(
                             message = it.success.asString(context),
                             duration = SnackbarDuration.Long,
@@ -74,14 +76,23 @@ fun SelfProfileScreen(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
+
             TopBarCard(
                 modifier = Modifier,
-                name = bloodDonorModel.name
+                name = bloodDonorModel.name,
+                isChecked = bloodDonorModel.available,
+                onAvailableToggleSwitchClick = { onEvent(SelfBloodDonorEvent.ToggleAvailable) }
             )
             Spacer(Modifier.height(dimens.size20))
             TabRowComponent(
                 contentScreens = listOf(
-                    { ProfileDetails(bloodDonorModel = bloodDonorModel) }
+                    {
+                        if (bloodDonorModel.bloodGroup != null) {
+                            ProfileDetails(bloodDonorModel = bloodDonorModel)
+                        } else {
+                            Text(" No Data")
+                        }
+                    }
                 ),
             )
         }

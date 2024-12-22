@@ -33,7 +33,7 @@ import com.hazrat.onedrop.core.domain.model.BloodDonorModel
 import com.hazrat.onedrop.core.presentation.component.BasicAppBar
 import com.hazrat.onedrop.ui.theme.dimens
 import com.hazrat.onedrop.R
-import com.hazrat.onedrop.auth.presentation.common.buttonShimmerEffect
+import com.hazrat.onedrop.auth.presentation.common.shimmerEffect
 
 
 /**
@@ -172,6 +172,7 @@ fun TopProfileCard(
                     profileEvent(BloodDonorProfileEvent.CallNow)
                 },
                 shape = RoundedCornerShape(dimens.size10),
+                enabled = bloodDonorModel?.isContactNumberPrivate == false
             ) {
                 Text("Call Now")
             }
@@ -240,7 +241,7 @@ fun AboutRowShimmerEffect(modifier: Modifier = Modifier) {
         Box(
             modifier = Modifier
                 .size(dimens.size40)
-                .buttonShimmerEffect(isRounded = true)
+                .shimmerEffect(isRounded = true)
         )
 
         Spacer(Modifier.width(dimens.size10))
@@ -248,14 +249,14 @@ fun AboutRowShimmerEffect(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .fillMaxWidth(0.2f)
                 .height(dimens.size10)
-                .buttonShimmerEffect()
+                .shimmerEffect()
         )
         Spacer(Modifier.weight(1f))
         Box(
             modifier = Modifier
                 .fillMaxWidth(0.4f)
                 .height(dimens.size10)
-                .buttonShimmerEffect()
+                .shimmerEffect()
         )
     }
 }
@@ -286,19 +287,19 @@ fun ProfileCardShimmerEffect(modifier: Modifier = Modifier) {
             Box(
                 modifier = Modifier
                     .height(dimens.size20)
-                    .buttonShimmerEffect()
+                    .shimmerEffect()
                     .fillMaxWidth(0.5f)
             )
             Box(
                 modifier = Modifier
                     .height(dimens.size10)
-                    .buttonShimmerEffect()
+                    .shimmerEffect()
                     .fillMaxWidth(0.3f)
             )
             Box(
                 modifier = Modifier
                     .height(dimens.size30)
-                    .buttonShimmerEffect()
+                    .shimmerEffect()
                     .fillMaxWidth(0.4f)
             )
         }
