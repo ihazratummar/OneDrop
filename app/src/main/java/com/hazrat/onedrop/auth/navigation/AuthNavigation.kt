@@ -22,6 +22,7 @@ import com.hazrat.onedrop.navigation.MasterRoot.RootNav
 fun NavGraphBuilder.authNavigation(
     navController: NavController,
     snackbarHostState: SnackbarHostState,
+    refreshDonorProfile: () -> Unit,
 ) {
     navigation<RootNav>(startDestination = AuthRoute.SignInScreenRoute) {
         composable<AuthRoute.SignInScreenRoute> {
@@ -43,6 +44,9 @@ fun NavGraphBuilder.authNavigation(
                 signInEvent = signInViewModel::onEvent,
                 userEvent = userEvent.value,
                 snackBarHostState = snackbarHostState,
+                refreshDonorProfile = {
+                    refreshDonorProfile()
+                }
             )
         }
         composable<AuthRoute.SignUpScreenRoute> {
@@ -63,7 +67,10 @@ fun NavGraphBuilder.authNavigation(
                 },
                 authEvent = authEvent,
                 signUpState = state.value,
-                signUpEvent = event
+                signUpEvent = event,
+                refreshDonorProfile = {
+                    refreshDonorProfile()
+                }
             )
         }
     }

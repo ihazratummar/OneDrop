@@ -32,7 +32,7 @@ import com.hazrat.onedrop.R
 import com.hazrat.onedrop.auth.presentation.AuthEvent
 import com.hazrat.onedrop.auth.presentation.common.AuthenticationButton
 import com.hazrat.onedrop.auth.presentation.common.BottomText
-import com.hazrat.onedrop.auth.presentation.common.MobileNumberTextField
+import com.hazrat.onedrop.auth.presentation.common.CustomTextField
 import com.hazrat.onedrop.auth.presentation.common.SocialLoginButton
 import com.hazrat.onedrop.main.MainActivity
 import com.hazrat.onedrop.ui.theme.Nunito
@@ -54,6 +54,7 @@ fun SignInScreen(
     signInEvent: (SignInEvent) -> Unit,
     userEvent: UserEvent?,
     snackBarHostState: SnackbarHostState,
+    refreshDonorProfile: () -> Unit
 ) {
 
     val context = LocalContext.current
@@ -105,7 +106,7 @@ fun SignInScreen(
                     fontFamily = Nunito
                 )
                 Spacer(Modifier.height(dimens.size50))
-                MobileNumberTextField(
+                CustomTextField(
                     value = signInState.email,
                     onValueChange = { signInEvent(SignInEvent.SetEmail(it)) },
                     textFieldTopLabel = "Email",
@@ -121,7 +122,7 @@ fun SignInScreen(
                     }
                 )
                 Spacer(Modifier.height(dimens.size20))
-                MobileNumberTextField(
+                CustomTextField(
                     value = signInState.password,
                     onValueChange = { signInEvent(SignInEvent.SetPassword(it)) },
                     textFieldTopLabel = "Password",
@@ -136,6 +137,7 @@ fun SignInScreen(
                         onDone = {
                             keyboardController?.hide()
                             signInEvent(SignInEvent.SignIn)
+                            refreshDonorProfile()
                         }
                     ),
                     isPasswordVisible = !signInState.isPasswordVisible,
@@ -152,6 +154,7 @@ fun SignInScreen(
                     onButtonClick = {
                         keyboardController?.hide()
                         signInEvent(SignInEvent.SignIn)
+                        refreshDonorProfile()
                     },
                     isButtonEnabled = signInState.isFormValid,
                     isLoadings = signInState.isLoading
@@ -168,6 +171,7 @@ fun SignInScreen(
                         onButtonClick = {
                             authEvent(AuthEvent.SetActivityContext(activity))
                             authEvent(AuthEvent.LoginWithGoogleCredential)
+                            refreshDonorProfile()
                         },
                         textColor = Color(0xffea4335)
                     )
@@ -178,7 +182,10 @@ fun SignInScreen(
                 BottomText(
                     messageText = "Don't have an account?",
                     buttonText = "Sign Up",
-                    onButtonClick = { onSignUpButtonClick() }
+                    onButtonClick = {
+                        onSignUpButtonClick()
+
+                    }
                 )
             }
         }

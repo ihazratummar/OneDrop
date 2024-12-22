@@ -1,6 +1,7 @@
 package com.hazrat.onedrop.ui.theme
 
 import android.app.Activity
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -20,6 +21,9 @@ import com.hazrat.onedrop.util.Dimens
 import com.hazrat.onedrop.util.ExpandedDimens
 import com.hazrat.onedrop.util.MediumDimens
 import androidx.compose.material3.Typography
+import androidx.compose.runtime.SideEffect
+import androidx.core.view.WindowCompat
+import com.hazrat.onedrop.ui.theme.darkScheme
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -95,6 +99,9 @@ fun OneDropTheme(
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            if (darkTheme) darkScheme else lightScheme
+        }
         darkTheme -> darkScheme
         else -> lightScheme
     }
@@ -105,10 +112,12 @@ fun OneDropTheme(
     val appDimens: Dimens
     val view = LocalView.current
 
-//    SideEffect {
-//        activity.window?.statusBarColor = Color.Transparent.toArgb()
-//        WindowCompat.getInsetsController(activity.window!!, view).isAppearanceLightStatusBars = !darkTheme
-//    }
+    if (!view.isInEditMode){
+        SideEffect {
+            val windowInsetsController = WindowCompat.getInsetsController(activity.window, view)
+            windowInsetsController.isAppearanceLightStatusBars = !darkTheme
+        }
+    }
     when(window.widthSizeClass){
         WindowWidthSizeClass.Compact -> {
             if (config.screenWidthDp <= 360 ){

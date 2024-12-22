@@ -5,12 +5,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.hazrat.onedrop.auth.presentation.AuthEvent
 import com.hazrat.onedrop.auth.presentation.ProfileState
+import com.hazrat.onedrop.core.domain.model.BloodDonorModel
 import com.hazrat.onedrop.core.presentation.component.ActivityAs
 import com.hazrat.onedrop.core.presentation.component.HomeActivityGrid
 import com.hazrat.onedrop.core.presentation.component.HomePageHeaderCard
@@ -25,9 +23,12 @@ import com.hazrat.onedrop.ui.theme.dimens
 fun HomeScreen(
     modifier: Modifier = Modifier,
     onActivityClick: (ActivityAs) -> Unit,
-    authEvent: (AuthEvent) -> Unit,
-    profileState: ProfileState
+    profileState: ProfileState,
+    bloodDonorList: List<BloodDonorModel>,
+    homeState: HomeState
 ) {
+
+
     Box(
         modifier = modifier.fillMaxSize()
     ) {
@@ -36,9 +37,10 @@ fun HomeScreen(
         ) {
             item {
                 HomePageHeaderCard(
-                    profileState = profileState
+                    profileState = profileState,
+                    isAvailable = homeState.isDonorAvailable,
+                    isRegistered = homeState.isDonorProfileExists
                 )
-
             }
             item {
                 Spacer(Modifier.height(dimens.size50))
@@ -46,17 +48,12 @@ fun HomeScreen(
                 HomeActivityGrid(
                     onActivityClick = { route ->
                         onActivityClick(route)
-                    }
+                    },
+                    bloodDonorList = bloodDonorList
                 )
-                Button(
-                    onClick = { authEvent(AuthEvent.SignOut) }
-                ) {
-                    Text("Sign Out")
-                }
             }
         }
     }
 }
-
 
 

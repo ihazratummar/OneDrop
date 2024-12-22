@@ -35,6 +35,7 @@ android {
 
 
         buildConfigField("String","GOOGLE_SIGN_WEB_SDK_CLIENT", localProperties.getProperty("GOOGLE_SIGN_WEB_SDK_CLIENT"))
+        buildConfigField("String","KEYSTORE_KEY_ALIAS", localProperties.getProperty("KEYSTORE_KEY_ALIAS"))
     }
 
 
@@ -86,6 +87,8 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
 
+    implementation (libs.gson)
+
     //Compose Navigation
     implementation(libs.androidx.navigation.compose)
 
@@ -118,6 +121,8 @@ dependencies {
     /* Firebase Implementation */
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.messaging)
+    implementation(libs.firebase.realtime.database)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage)
     implementation(libs.firebase.auth)
@@ -126,5 +131,7 @@ dependencies {
 
 //Splash Api
     implementation (libs.androidx.core.splashscreen)
+
+    implementation(libs.androidx.swiperefreshlayout)
 
 }

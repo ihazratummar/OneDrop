@@ -29,7 +29,7 @@ import com.hazrat.onedrop.R
 import com.hazrat.onedrop.auth.presentation.AuthEvent
 import com.hazrat.onedrop.auth.presentation.common.AuthenticationButton
 import com.hazrat.onedrop.auth.presentation.common.BottomText
-import com.hazrat.onedrop.auth.presentation.common.MobileNumberTextField
+import com.hazrat.onedrop.auth.presentation.common.CustomTextField
 import com.hazrat.onedrop.auth.presentation.common.SocialLoginButton
 import com.hazrat.onedrop.ui.theme.Nunito
 import com.hazrat.onedrop.ui.theme.dimens
@@ -46,7 +46,8 @@ fun SignUpScreen(
     onSignInButtonClick: () -> Unit,
     authEvent: (AuthEvent) -> Unit,
     signUpState: SignUpState,
-    signUpEvent: (SignUpEvent) -> Unit
+    signUpEvent: (SignUpEvent) -> Unit,
+    refreshDonorProfile:() -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val context = LocalContext.current
@@ -70,7 +71,7 @@ fun SignUpScreen(
                 )
                 Spacer(Modifier.height(dimens.size50))
 
-                MobileNumberTextField(
+                CustomTextField(
                     value = signUpState.name,
                     onValueChange = { signUpEvent(SignUpEvent.SetName(it)) },
                     textFieldTopLabel = "Name",
@@ -86,7 +87,7 @@ fun SignUpScreen(
                     }
                 )
                 Spacer(Modifier.height(dimens.size20))
-                MobileNumberTextField(
+                CustomTextField(
                     value = signUpState.email,
                     onValueChange = { signUpEvent(SignUpEvent.SetEmail(it)) },
                     textFieldTopLabel = "Email",
@@ -102,7 +103,7 @@ fun SignUpScreen(
                     }
                 )
                 Spacer(Modifier.height(dimens.size20))
-                MobileNumberTextField(
+                CustomTextField(
                     value = signUpState.password,
                     onValueChange = { signUpEvent(SignUpEvent.SetPassword(it)) },
                     textFieldTopLabel = "Password",
@@ -117,6 +118,7 @@ fun SignUpScreen(
                         onDone = {
                             keyboardController?.hide()
                             signUpEvent(SignUpEvent.SignUp)
+                            refreshDonorProfile()
                         }
                     ),
                     isTrailingForPassword = true,
@@ -133,6 +135,7 @@ fun SignUpScreen(
                     onButtonClick = {
                         keyboardController?.hide()
                         signUpEvent(SignUpEvent.SignUp)
+                        refreshDonorProfile()
                     },
                     isButtonEnabled = signUpState.isFormValid,
                     isLoadings = signUpState.isLoading
@@ -149,6 +152,7 @@ fun SignUpScreen(
                         onButtonClick = {
                             authEvent(AuthEvent.SetActivityContext(activity))
                             authEvent(AuthEvent.LoginWithGoogleCredential)
+                            refreshDonorProfile()
                         },
                         textColor = Color(0xffea4335)
                     )

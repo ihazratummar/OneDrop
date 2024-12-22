@@ -11,47 +11,62 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-sealed class Route {
+sealed class MainRoute {
 
     @Serializable
-    data object HomeRoute : Route()
+    data object HomeRoute : MainRoute()
 
     @Serializable
-    data object SearchRoute : Route()
+    data object SearchRoute : MainRoute()
 
     @Serializable
-    data object MoreRoute : Route()
+    data object MoreRoute : MainRoute()
 
     @Serializable
-    data object BloodDonorRoute : Route()
+    data object BloodDonorRoute : MainRoute()
 
 
     @Serializable
-    data object RequestBloodRoute : Route()
+    data object CreateBloodDonorProfileRoute : MainRoute()
 
+
+    @Serializable
+    data object RequestBloodScreenRoute : MainRoute()
+
+    @Serializable
+    data object CreateBloodRequestRoute : MainRoute()
+
+    @Serializable
+    data class BloodDonorsProfileScreenRoute(val userId: String) : MainRoute()
+
+    @Serializable
+    data object SelfProfileScreenRoute : MainRoute()
+
+    @Serializable
+    data object SettingScreenRoute : MainRoute()
 
 }
 
 
 sealed class BottomNavigation<T>(val icon: Int, val fillIcon: Int, val name: String, val route: T) {
-    data object HomeNav : BottomNavigation<Route.HomeRoute>(
+    data object HomeNav : BottomNavigation<MainRoute.HomeRoute>(
         icon = R.drawable.home,
         fillIcon = R.drawable.homefill,
         name = "Home",
-        route = Route.HomeRoute
+        route = MainRoute.HomeRoute
     )
 
-    data object SearchNav : BottomNavigation<Route.SearchRoute>(
-        icon = R.drawable.outline_search,
-        fillIcon = R.drawable.search_filled,
-        name = "Search",
-        route = Route.SearchRoute
+    data object RequestBloodNav : BottomNavigation<MainRoute.RequestBloodScreenRoute>(
+        icon = R.drawable.request_blood_outline,
+        fillIcon = R.drawable.request_blood,
+        name = "Request Blood",
+        route = MainRoute.RequestBloodScreenRoute
     )
 
-    data object MoreNav : BottomNavigation<Route.MoreRoute>(
+    data object MoreNav : BottomNavigation<MainRoute.MoreRoute>(
         icon = R.drawable.more_outline,
         fillIcon = R.drawable.more_filled,
         name = "More",
-        route = Route.MoreRoute
+        route = MainRoute.MoreRoute
     )
 }

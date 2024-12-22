@@ -23,10 +23,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.hazrat.onedrop.auth.navigation.authNavigation
+import com.hazrat.onedrop.auth.presentation.AuthEvent
 import com.hazrat.onedrop.auth.presentation.AuthState
 import com.hazrat.onedrop.auth.presentation.ProfileState
 import com.hazrat.onedrop.core.navigation.BottomNavigation
 import com.hazrat.onedrop.core.navigation.contentNavigation
+import com.hazrat.onedrop.core.presentation.blood_donor_screen.BloodDonorEvent
+import com.hazrat.onedrop.core.presentation.blood_donor_screen.BloodDonorViewModel
 import kotlinx.serialization.Serializable
 
 @Composable
@@ -35,7 +38,9 @@ fun AppNavigation(
     navHostController: NavHostController,
     profileState: ProfileState,
     snackbarHostState: SnackbarHostState,
-    authState: AuthState
+    authState: AuthState,
+    authEvent: (AuthEvent) -> Unit,
+    bloodDonorViewModel: BloodDonorViewModel
 ) {
 
 
@@ -44,15 +49,22 @@ fun AppNavigation(
         navController = navHostController,
         startDestination = MasterRoot.RootNav
     ) {
+        val bloodDonorEvent = bloodDonorViewModel::onEvent
         if (authState == AuthState.Authenticated) {
             contentNavigation(
                 snackbarHostState = snackbarHostState,
-                profileState = profileState
+                profileState = profileState,
+                authEvent = authEvent,
+                navController = navHostController,
+                bloodDonorViewModel = bloodDonorViewModel,
             )
         } else {
             authNavigation(
                 navController = navHostController,
                 snackbarHostState = snackbarHostState,
+                refreshDonorProfile = {
+                    bloodDonorEvent(BloodDonorEvent.Refresh)
+                }
             )
         }
     }
@@ -64,7 +76,7 @@ fun BottomNavigationBar(
 ) {
     val bottomNavItems = listOf(
         BottomNavigation.HomeNav,
-        BottomNavigation.SearchNav,
+        BottomNavigation.RequestBloodNav,
         BottomNavigation.MoreNav,
     )
     val currentStackEntry by navHostController.currentBackStackEntryAsState()
@@ -110,8 +122,8 @@ fun BottomNavigationBar(
                             selectedIconColor = MaterialTheme.colorScheme.primary,
                             selectedTextColor = MaterialTheme.colorScheme.primary,
                             indicatorColor = Color.Transparent,
-                            unselectedIconColor = Color.Gray,
-                            unselectedTextColor = Color.Gray
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurface,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurface
                         )
                     )
                 }
@@ -121,9 +133,8 @@ fun BottomNavigationBar(
 }
 
 @Serializable
-sealed class MasterRoot(){
+sealed class MasterRoot() {
     @Serializable
     data object RootNav : MasterRoot()
-
 }
 

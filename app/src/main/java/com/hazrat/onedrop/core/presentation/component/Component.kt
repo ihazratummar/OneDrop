@@ -2,6 +2,7 @@ package com.hazrat.onedrop.core.presentation.component
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -36,7 +37,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.hazrat.onedrop.R
 import com.hazrat.onedrop.auth.presentation.ProfileState
-import com.hazrat.onedrop.core.navigation.Route
+import com.hazrat.onedrop.auth.presentation.common.shimmerEffect
+import com.hazrat.onedrop.core.domain.model.BloodDonorModel
+import com.hazrat.onedrop.core.navigation.MainRoute
 import com.hazrat.onedrop.ui.theme.dimens
 
 /**
@@ -47,7 +50,9 @@ import com.hazrat.onedrop.ui.theme.dimens
 @Composable
 fun HomePageHeaderCard(
     modifier: Modifier = Modifier,
-    profileState: ProfileState
+    profileState: ProfileState,
+    isAvailable: Boolean,
+    isRegistered: Boolean = false
 ) {
     Box(
         modifier = modifier
@@ -59,14 +64,16 @@ fun HomePageHeaderCard(
                 .fillMaxWidth()
                 .height(dimens.size250),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
             )
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 ProfileAndIcons(
                     modifier = Modifier.align(Alignment.Center),
-                    profileState = profileState
+                    profileState = profileState,
+                    isAvailable = isAvailable,
+                    isRegistered = isRegistered
                 )
             }
         }
@@ -103,7 +110,9 @@ fun HomePageHeaderCard(
 @Composable
 fun ProfileAndIcons(
     modifier: Modifier = Modifier,
-    profileState: ProfileState
+    profileState: ProfileState,
+    isAvailable: Boolean = true,
+    isRegistered: Boolean
 ) {
     Row(
         modifier = modifier
@@ -113,25 +122,28 @@ fun ProfileAndIcons(
     ) {
         Column {
             Text(
-                text = profileState.userData?.fullName?:"",
+                text = profileState.userData?.fullName ?: "",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(style = SpanStyle()) {
-                        append("Donate Blood: ")
+            if (isRegistered){
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(style = SpanStyle()) {
+                            append("Donate Blood: ")
+                        }
+                        withStyle(
+                            style = SpanStyle(
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            append(if (!isAvailable) "Off" else "On")
+                        }
+
                     }
-                    withStyle(
-                        style = SpanStyle(
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        append("Off")
-                    }
-                }
-            )
+                )
+            }
         }
         Spacer(Modifier.weight(1f))
         Icon(painter = painterResource(R.drawable.notificationonn), null)
@@ -141,7 +153,8 @@ fun ProfileAndIcons(
 
 @Composable
 fun HomeActivityGrid(
-    onActivityClick: (ActivityAs) -> Unit
+    onActivityClick: (ActivityAs) -> Unit,
+    bloodDonorList: List<BloodDonorModel>
 ) {
     Row(
         modifier = Modifier
@@ -151,7 +164,7 @@ fun HomeActivityGrid(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         val activity = listOf(
-            ActivityAs.BloodDonor,
+            ActivityAs.BloodDonor(bloodDonorList),
             ActivityAs.RequestBlood,
         )
         activity.forEach {
@@ -191,7 +204,7 @@ fun BloodGroupCard(
     }
 }
 
-@Preview
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ActivityCards(
@@ -290,36 +303,233 @@ fun HomePageSectionHeading(
 }
 
 
-sealed class BloodGroup(val name: String, val icon: Int) {
-    data object APositive : BloodGroup(name = "A+", icon = R.drawable.a_plus)
-    data object ANegative : BloodGroup(name = "A-", icon = R.drawable.a_minus)
-    data object BPositive : BloodGroup(name = "B+", icon = R.drawable.b_plus)
-    data object BNegative : BloodGroup(name = "B-", icon = R.drawable.b_minus)
-    data object ABPositive : BloodGroup(name = "AB+", icon = R.drawable.ab_plus)
-    data object ABNegative : BloodGroup(name = "AB-", icon = R.drawable.ab_minus)
-    data object OPositive : BloodGroup(name = "O+", icon = R.drawable.o_plus)
-    data object ONegative : BloodGroup(name = "O-", icon = R.drawable.o_minus)
-}
-
 sealed class ActivityAs(
     val icon: Int,
     val title: String,
     val subText: String,
-    val route: Route
+    val route: MainRoute
 ) {
-    data object BloodDonor : ActivityAs(
+    data class BloodDonor(val bloodDonorList: List<BloodDonorModel>) : ActivityAs(
         icon = R.drawable.blood_donor,
         title = "Blood Donor",
-        subText = "120 Posts",
-        route = Route.BloodDonorRoute
+        subText = bloodDonorList.size.toString(),
+        route = MainRoute.BloodDonorRoute
     )
 
 
     data object RequestBlood : ActivityAs(
-        icon = R.drawable.create_post,
+        icon = R.drawable.request_blood,
         title = "Request Blood",
         subText = "3 steps",
-        route = Route.RequestBloodRoute
+        route = MainRoute.RequestBloodScreenRoute
     )
 
+}
+
+
+@Composable
+fun BasicAppBar(
+    modifier: Modifier = Modifier,
+    onBackClick: () -> Unit,
+    title: String,
+    action: @Composable () -> Unit
+) {
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = dimens.size10),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.arrowleft),
+            contentDescription = null,
+            modifier = Modifier
+                .clickable { onBackClick() }
+                .padding(dimens.size10)
+        )
+        Spacer(Modifier.width(dimens.size10))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(Modifier.weight(1f))
+        action()
+    }
+
+}
+
+
+@Composable
+fun BloodDonorsCards(
+    isContactPrivate: Boolean = false,
+    isAddressPrivate: Boolean = false,
+    donorList: BloodDonorModel = BloodDonorModel(),
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                onClick()
+            }
+            .height(dimens.size150)
+            .padding(vertical = dimens.size5, horizontal = dimens.size8),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        ),
+    ) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(dimens.size10),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(
+                    donorList.bloodGroup?.getIconResId() ?: R.drawable.onedrop_logo
+                ),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(dimens.size60),
+                tint = Color.Unspecified
+            )
+            Spacer(Modifier.width(dimens.size20))
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceAround
+            ) {
+                Text(
+                    donorList.name,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = if (!isContactPrivate) donorList.contactNumber else donorList.contactNumber.take(
+                        5
+                    ) + "XXXXX",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+
+                if (!isAddressPrivate) {
+                    Text(
+                        "${donorList.city} , ${donorList.district} , ${donorList.state}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun RegisterAsDonorCard(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    text: String = "Register as a blood donor?"
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(dimens.size10)
+            .combinedClickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = { onClick() }
+            ),
+        colors = CardDefaults.cardColors(
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        ),
+        shape = RoundedCornerShape(dimens.size10)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = dimens.size10, vertical = dimens.size20),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.titleMedium
+            )
+            Spacer(Modifier.width(dimens.size35))
+            Icon(
+                painter = painterResource(R.drawable.onedrop_logo), null,
+                modifier = Modifier.size(dimens.size30),
+                tint = Color.Unspecified
+            )
+            Spacer(Modifier.weight(1f))
+        }
+    }
+
+}
+
+
+@Preview
+@Composable
+fun CardLoadingAnimation() {
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(dimens.size150)
+            .padding(vertical = dimens.size5, horizontal = dimens.size8),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+        ),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(dimens.size10),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .shimmerEffect(isRounded = true)
+                    .size(dimens.size60)
+            )
+
+            Spacer(Modifier.width(dimens.size20))
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceAround
+
+            ) {
+                Box(
+                    modifier = Modifier
+                        .padding(vertical = dimens.size10)
+                        .fillMaxWidth(fraction = 0.8f)
+                        .height(dimens.size20)
+                        .shimmerEffect()
+                )
+                Box(
+                    modifier = Modifier
+                        .padding(vertical = dimens.size10)
+                        .fillMaxWidth(fraction = 0.5f)
+                        .height(dimens.size15)
+                        .shimmerEffect()
+                )
+                Box(
+                    modifier = Modifier
+                        .padding(vertical = dimens.size10)
+                        .fillMaxWidth()
+                        .height(dimens.size10)
+                        .shimmerEffect()
+                )
+
+            }
+        }
+    }
 }

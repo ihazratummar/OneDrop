@@ -25,6 +25,8 @@ import androidx.navigation.compose.rememberNavController
 import com.hazrat.onedrop.auth.presentation.AuthState
 import com.hazrat.onedrop.auth.presentation.AuthViewModel
 import com.hazrat.onedrop.auth.presentation.common.NetworkStatusBar
+import com.hazrat.onedrop.core.presentation.blood_donor_screen.BloodDonorViewModel
+import com.hazrat.onedrop.core.presentation.self_profile_screen.SelfProfileViewModel
 import com.hazrat.onedrop.navigation.AppNavigation
 import com.hazrat.onedrop.navigation.BottomNavigationBar
 import com.hazrat.onedrop.ui.theme.OneDropTheme
@@ -45,10 +47,13 @@ class MainActivity : ComponentActivity() {
         // Hide the action bar
         actionBar?.hide()
         setContent {
-            OneDropTheme {
+            val viewModel: MainViewModel = hiltViewModel()
+            val isDarkThemeEnabled  = viewModel.isDarkThemeEnabled.collectAsStateWithLifecycle()
+            OneDropTheme (
+                darkTheme = isDarkThemeEnabled.value
+            ){
                 val navController = rememberNavController()
                 val snackBarHostState = remember { SnackbarHostState() }
-                val viewModel: MainViewModel = hiltViewModel()
                 val isConnected = viewModel.isConnected.collectAsStateWithLifecycle()
                 Scaffold(
                     snackbarHost = {
@@ -73,15 +78,16 @@ class MainActivity : ComponentActivity() {
                             )
 
                         }
-                    }
+                    },
                 ) {
                     val bottomPadding = it.calculateBottomPadding()
                     val authViewModel: AuthViewModel = hiltViewModel()
-                    val authState =
-                        authViewModel.authState.observeAsState(initial = AuthState.Loading)
+                    val bloodDonorViewModel: BloodDonorViewModel = hiltViewModel()
+                    val selfProfileViewModel: SelfProfileViewModel = hiltViewModel()
+                    val authState = authViewModel.authState.observeAsState(initial = AuthState.Loading)
                     val profileState = authViewModel.profileState.collectAsState()
-
-                    if (authState.value == AuthState.Loading) {
+                    val authEvent = authViewModel::event
+                    if (authState.value == AuthState.Loading || !isConnected.value) {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
@@ -95,7 +101,9 @@ class MainActivity : ComponentActivity() {
                             navHostController = navController,
                             profileState = profileState.value,
                             snackbarHostState = snackBarHostState,
-                            authState = authState.value
+                            authState = authState.value,
+                            authEvent = authEvent,
+                            bloodDonorViewModel = bloodDonorViewModel
                         )
                     }
                 }

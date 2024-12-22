@@ -1,6 +1,7 @@
 package com.hazrat.onedrop.auth.data.repository
 
 import android.content.Context
+import android.util.Log
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
@@ -26,6 +27,7 @@ import com.hazrat.onedrop.auth.presentation.ProfileState
 import com.hazrat.onedrop.auth.presentation.UserData
 import com.hazrat.onedrop.auth.util.saveUserToFirestore
 import com.hazrat.onedrop.util.RootConstants.INTERNALSTORAGEPICTUREFOLDER
+import com.hazrat.onedrop.util.datastore.DataStorePreference
 import com.hazrat.onedrop.util.results.Result
 import com.hazrat.onedrop.util.results.SignInErrorResult
 import com.hazrat.onedrop.util.results.SignInSuccessResult
@@ -51,8 +53,9 @@ class AuthRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
     private val credentialManager: CredentialManager,
+    private val dataStorePreference: DataStorePreference
 
-    ) : AuthRepository {
+) : AuthRepository {
     private lateinit var activity: Context
 
 
@@ -227,6 +230,8 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override suspend fun signOut() {
+
+        dataStorePreference.clearAllData()
 
         credentialManager.clearCredentialState(
             ClearCredentialStateRequest()
